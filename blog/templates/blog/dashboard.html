@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags_filter %}
+
+{% block title %} &#8211; Dashboard{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<div class="row mt-5">
+			<div class="col-12 col-lg-8 post-list-sections mb-3">
+        <div class="row align-items-center">
+          <div class="col-1 scroll-btn left" style="visibility: hidden;">
+            <i class="bi bi-chevron-left"></i>
+          </div>      
+          <div class="col-10  sub-header" id="sub-header">
+            <ul class="navbar-links px-2 mt-4 scroll-x" id="sub-header-list">
+              <li class="nav-item {% if section == 'dashboard' %} selected {% endif %}">
+                <a class="nav-link" href="/">For You</a>
+              </li>
+              <li class="nav-item {% if section == 'following' %} selected {% endif %}">
+                <a class="nav-link" href="/?feed=following">Following</a>
+              </li>
+              {% for interest in interests %}
+                {% with slug=interest.tag.slug %}
+                  <li class="nav-item {% if section == slug %} selected {% endif %}">
+                    <a class="nav-link no-wrap" href="/?tag={{slug}}" title="Topic you interested in">{{ interest }}</a>
+                  </li>
+                {% endwith %}
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="col-1 scroll-btn right">
+            <i class="bi bi-chevron-right"></i>
+          </div>
+        </div>
+			</div>
+			<div class="col-12 col-lg-8">
+				<section id="for-you-section" class="section-for-you">
+          {% include "blog/post_list.html" %}
+				</section>
+        <section id="feed-following-section" class="section-feed-followings hide"></section>
+        <section id="topic_interests_section" class="section-topic-interests hide">
+        </section>
+			</div>
+
+      <!-- START SIDEBAR -->
+      <aside class="col-lg-4 aside lg-aside-sticky lg-aside-pos border-start">
+        <section class="section--trending-posts">
+          <div class="container">
+            <h5 class="mb-3 text-capitalize fw-bold pb-2 border-bottom">Latest Trending Posts</h5>
+            {% for  post in latest_trending_posts %}
+            {% with author=post.author profile=post.author.profile pub_date=post.published_on %}
+              <div class="row">
+                <div class="col-12 d-inline-flex gap-2 align-items-center">
+                  <div class="prof-pic-section">
+                    <a href="{% url "blog:user-profile" author %}" class="navlink-hvr">
+                      {% if not profile.avatar  %}
+                        <div class="prof-pic-sn-anonymous">
+                          <i class="bi bi-person-fill"></i>
+                        </div>
+                      {% else %}
+                        <img class="user-profile-img-base img-fluid" src="{% static profile.avatar.url %}" alt="User profile picture">
+                      {% endif %}
+                    </a>	
+                  </div>
+                  <div class="col ">
+                    <a href="{% url "blog:user-profile" author %}" class="link text-capitalize sm-font"><small class="sm-font lh-base">{{ author }}</small></a>
+                  </div>
+                </div>
+                <div class="col-12 mb-2">
+                  <a class="link-reg text-capitalize sm-font fw-600 d-block text-truncate" href="{{ post.get_absolute_url }}">{{post.title}}</a>
+                  {% comment %} <small class="text-secondary">{{post.published_on |my_timesince }}</small> {% endcomment %}
+                </div>
+                <div class="col-12 mb-3 text-secondary pub-date md-font">
+                  {% if pub_date|my_timesince == pub_date %} 
+                    {{ pub_date|date:"M d, y"}}
+                  {% else %}
+                    {{ pub_date|my_timesince }} ago
+                  {% endif %}
+                </div>                
+              </div>
+            {% endwith %}
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- Section for Tags -->
+       <section class="section--tags mt-5">
+         <div class="container">
+           <h5 class="mb-3 text-capitalize fw-bold pb-2 border-bottom">Recommend Topics</h5>
+           <div class="d-flex gap-2 flex-wrap mb-4 tags-font">
+             <!-- Most popular tags -->
+             {% for tag in recommended_topics %}
+               <a href="{% url "blog:tagged-stories" tag.slug %}" class="btn blg-btn-outline-success rounded-pill py-1">{{tag}}</a>
+              {% empty %} 
+                <div class='mb-2 sm-font'>
+                  No topics to recommend.
+                </div>
+              {% endfor %}
+           </div>
+         </div>
+       </section>
+
+        <!-- Section for Bookmarks -->
+       <section class="section--bookmarks mt-5">
+         <div class="container">
+            <h5 class="mb-3 text-capitalize fw-bold pb-2 border-bottom">Recently Saved</h5>
+            <!-- Most popular tags -->
+            {% for bookmark in recent_bookmarks %}
+              {% with post=bookmark.bookmark_post %}
+              <div class="mb-2 d-flex justify-content-between">
+                <div class="">
+                  <a class="link-reg text-capitalize md-font " href="{{ post.get_absolute_url }}">{{post.title}}</a>
+                </div>
+                <small class="text-muted text-truncate">{{ bookmark.created_on |my_timesince }}</small>
+              </div>                
+              {% endwith %}
+            {% empty %}
+              <div class='mb-3 sm-font'>
+                No posts rececntly saved.
+              </div>
+            {% endfor %}
+         </div>
+       </section>
+       <!-- Footer Section -->
+       <section class="aside-footer mt-3">
+        {% block footer %}
+          {% include "footer.html" %}
+        {% endblock %}
+       </section>
+      </aside>
+      <!-- END -->
+		</div>
+	</div>
+{% endblock  %}
+
+
+{% block script %}
+  <script src="{% static "js/util.js" %}" ></script>
+  <script src="{% static "js/dashboard.js" %}" type="module"></script>
+  <script>
+    // BOOKMARK and UnBOOKMARK posts 
+    const bookmarkBtns = document.querySelectorAll('.bookmark');
+    if (bookmarkBtns !== null) {
+      bookmarkBtns.forEach(bookmarkBtn => {
+        bookmarkBtn.addEventListener('click', (e) => {   
+          let post_id = bookmarkBtn.id.match(/\d+/)[0]
+   
+          // Fetch data  and toggle top and bottom bookmark icon               
+          fetchNToggle({
+            btns: bookmarkBtn, 
+            url:`/bookmark-post/${post_id}`,
+            method: 'POST',
+            action: bookmarkBtn.dataset.action,
+            iconName: 'bookmark',
+          }); // Bookmark on single post
+   
+        });
+      });
+    }
+  </script>
+{% endblock %}

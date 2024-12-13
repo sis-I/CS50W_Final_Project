@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %} &#8211; Sign Up{% endblock %}
+
+{% block content %}
+<div class="login-box">
+  <div class="container">
+      <div class="row text-center">
+          <div class="col-10 col-sm-9 col-md-8 col-lg-5 px-4 rounded mx-auto bg-light form-group shadow">
+              <h2 class="display-5 my-4">Sign Up</h2>
+              {% if message %}
+                  <p class="error-msg text-small">
+                    <span><i class="bi bi-exclamation-circle"></i></span> 
+                    {{ message }}
+                  </p>
+              {% endif %}
+              <form action="{% url "accounts:signup" %}" method="post">
+                <div class="row mb-2">
+                  <div class="col-6">
+                    <input required autofocus type="text" name="first_name" id="first-name" placeholder="First name" class="form-control ps-4 rounded-pill no-shadow">
+                  </div>
+                  <div class="col-6">
+                    <input required type="text" name="last_name" id="last-name" placeholder="Last name"  class="form-control ps-4 rounded-pill no-shadow">
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <input required type="text" name="username" id="username" placeholder="Username" class="form-control ps-4 rounded-pill no-shadow">
+                </div>
+                <div class="mb-2">
+                  <input required type="email" name="email" id="email" placeholder="Email" class="form-control ps-4 rounded-pill no-shadow" >
+                </div>                
+                <div class="mb-2">
+                  <input required type="password" name="password" id="password1" placeholder="Password" class="form-control ps-4 rounded-pill no-shadow" >
+                </div>
+                <div class="mb-3">
+                  <input required type="password" name="confirmation" id="password2" placeholder="Re-password"  class="form-control ps-4 rounded-pill no-shadow" >
+                </div>
+                <input type="hidden" name="next" value="{{next}}">
+
+                <!-- Select Section -->
+                <div class="mb-3 interests--select-box text-start rounded p-1">
+                  <label for="interest-select" class="ps-4">
+                    <strong>Your Interests?</strong> <small class="text-muted">(Must select atleast three)</small>
+                    <span class="btn btn-sm open-select"><i class="bi bi-caret-right-fill"></i></span>
+                  </label>
+                  <select required class="mx-auto form-select border-0 rounded no-shadow hide" name="categories" size="8" multiple id="interest-select">
+                    {% for category in categories %}
+                      <option class= "rounded text-center mx-auto py-1 mb-1" value="{{ category.slug }}">{{ category.name }} </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <input type="submit" class="btn blg-btn-primary rounded-pill w-100 signup" value="Sign Up">
+                </div>
+              </form>
+              <div class="col mb-4">
+                  <p>Do you have an account? <strong><a href="{% url "accounts:login" %}" class="login-box-link">Sign In</a>.</strong></p>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+   // Interests
+    const interestsBox = document.querySelector('.interests--select-box');
+    const openSelectBtn = document.querySelector('.open-select');
+    const select = document.getElementById('interest-select');
+
+    openSelectBtn.addEventListener('click', (e) => {
+      select.classList.toggle('hide');
+
+      // Close Select when clicked outside
+      document.addEventListener('click', closeSelect);
+
+    });
+
+    
+    const MIN_OPTIONS = 3;
+    const signup = document.querySelector('form .signup');
+    
+    signup.disabled = true;
+
+    select.addEventListener('change', () => {
+      if (select.selectedOptions.length < MIN_OPTIONS) {
+        signup.disabled = true;
+      } else {
+        signup.disabled = false;
+      }
+    });
+
+    // Close Select Modal
+    const closeSelect = (e) => {
+      if (!e.target.closest('.interests--select-box')) {
+        select.classList.add('hide');
+        document.removeEventListener('click', closeSelect);
+      }
+    };
+    
+  </script>
+{% endblock %}

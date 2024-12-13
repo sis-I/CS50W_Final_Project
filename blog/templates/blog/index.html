@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_tags_filter %}
+{% block title %}&#8211; Home {% endblock %}
+
+{% block content %}
+  <div class="container mw-100">
+    <div class="row">
+      <div class="col-12 section--info mb-5">
+        <section class="">
+          <div class="container">
+            <div class="row">
+              <div class="col col-md-8 mb-auto ">
+                <h1 class="display-3 fw-bold">Stay Informed and Share Your Stories To The World</h1>
+                <p class="lh-lg description">
+                  Start your journey into any knowledge in the world, and unbox what is inside of you 
+                  to outside world, you then will be part of others who shares theri stories.
+                </p>
+              </div>
+              <div class="">
+                <a href="{% url "accounts:login" %}" class="btn blg-btn-success-hv-outline section--info__btn">
+                  Get Started
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="col-12 col-lg-8 px-5">  
+        <section class="section--trending-posts">
+          <div class="container">
+            <h3 class="mb-3 text-capitalize">Trending Posts</h3>
+            <hr>
+            <div class="row">
+              {% for  post in trendings %}
+              <div class="col-12 col-md-6 mb-3">
+                <p class="h5 fw-600">
+                  <a class="link text-capitalize" href="{{ post.get_absolute_url }}">{{post.title}}</a>
+                </p>
+                <div class="subtitle-or-body-text">
+                  <!-- If post has subtitle show here or truncated body content -->
+                  {% if post.subtitle %}
+                  <p class="lh-lg text-secondary">{{ post.subtitle }}</p>
+                  {% else %}
+                  <p class="text-secondary">{{ post.content|safe |truncatewords:9 }}</p>
+                  {% endif %}
+
+                </div>
+                <small class="text-secondary">{{post.published_on | timesince }}</small>
+              </div>                
+              {% endfor %}
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="col-12 col-lg-4 lg-aside-sticky tag-pos px-5">
+        <!-- Section for Tags -->
+        <section class="section--tags mt-5">
+          <div class="container">
+            <h3 class="mb-3">Tags</h3>
+            <div class="d-flex gap-2 flex-wrap mb-4 tags-font">
+              <!-- Most popular tags -->
+                {% for tag in tags %}
+                  <a href="{% url "blog:tagged-stories" tag.slug %}" class="btn blg-btn-outline-success rounded-pill py-1">{{tag}}</a>
+                {% endfor %}
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="px-lg-5">
+      </div>
+      <div class="col-12 col-lg-8 px-5 mt-5">
+        {% include "blog/post_list.html" %}
+      </div>
+
+      <!-- START SIDEBAR -->
+      <aside class="col-lg-4 aside lg-aside-sticky lg-tag-pos border-start">
+        <!-- Footer Section -->
+        <section class="aside-foote r">
+        {% block footer %}
+          {% include "footer.html" %}
+        {% endblock %}
+        </section>
+      </aside>
+      <!-- END -->
+    </div>
+  </div>
+{% endblock  %}

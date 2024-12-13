@@ -1,0 +1,100 @@
+{% load static %}
+
+{% load custom_tags_filter %}
+
+{% with commentby=comment.author parent=comment.parent comment_id=comment.id like_users=comment.like_users.all like_counts=comment.like_users.count %}
+<div class="container mt-2" id="comment-row-{{ comment_id }}">
+  <div class="row md-font">
+    <div class="col-12 col-md-8 mx-auto">
+      <div class="d-flex gap-2 fw-600">
+        <div class="align-self-center">
+          <!-- TODO  __Implement the commenter avatar -->
+          {% if not commentby.profile.avatar %}
+            <span><i class="bi bi-person-circle" style="font-size: 1.5rem; color: gray;"></i></span>
+          {% else %}
+            <img class="user-profile-img" src="{% static commentby.profile.avatar.url %}" alt="User profile picture">
+          {% endif %}
+        </div>
+        <div class="">
+          <span class="text-capitalize">
+            <!-- All links to user profile must have className username -->
+            <a href="{% url 'blog:user-profile' user %}" class="link username">{{ commentby.first_name }} {{ commentby.last_name }}</a> 
+            <span> &#8226; </span> 
+            {% if user == commentby %}
+              <span class="delete-comment-parent" id="parent-{{ comment_id }}">
+                <span id="comment-del-btn-{{comment_id}}" class="link delete-comment-btn">Delete</span>
+                <!-- TODO: Delete Comment Modal -->
+                <div class="rounded shadow hide border p-2 delete-comment-modal-box" id="delete-comment-modal-{{comment_id}}" >
+                  <div class="p-2 bg-white text-center">
+                    <span class=""><i class="bi bi-info-circle-fill"></i> <span>Are you sure you want to delete this comment?</span></span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <div class="btn close-btn">
+                      Cancel
+                    </div>
+                    <div class="">
+                      <form action="{% url "blog:delete-comment" comment_id %}" method="post">
+                        {% csrf_token %}
+                        {% comment %} <input type="hidden" name="comment" value="{{comment_id}}"/> {% endcomment %}
+                        <input class="btn" type="submit" value="Yes"/>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </span>
+              <!-- TODO - IMPLEMENT EDIT FUNCTIONALITY -->
+              <!--
+              <span> &#8226; </span> 
+              <span>
+                <span class="text-muted" >Edit</span>
+              </span> -->
+
+            {% else %}
+              <span class="link-success follow-actio " id="" data-username="{{commentby}}">
+                {% if user in commentby.followers.all %}Unfollow{%else%}Follow{% endif %}
+              </span>
+            {% endif %}
+          </span>
+          <div class="">
+            <!--div class="md-font">
+              {% comment %} <span class="text-muted">Published in</span> Pulication Name {% endcomment %}
+            </div>-->
+            <span class="text-muted">
+              {{ comment.created_on | timesince }} 
+              <!--{% if post.published_on != post.updated_on %} 
+                (Updated {{ post.updated_on | timesince }} ago)
+              {% endif %}-->
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment body -->
+    <div class="col-12 col-md-8 mx-auto pb-3 mt-2">
+      {{ comment.body | safe }}
+    </div>
+    <!-- Comment like & reply -->
+    <div class="col-12 col-md-8 mx-auto">
+      <div class="d-flex d-md-flex-none justify-content-between border-bottom pb-2">
+        <div class="link comment-like" id="comment-like-{{comment_id}}" data-action="{% if user in like_users %}un{% endif %}like">
+          <span><i class="bi bi-hand-thumbs-up{% if user in like_users %}-fill{% endif %}"></i></span>
+          <span class="comment_total-likes">{{ like_counts |shortnum}}</span>
+        </div>
+        <div id="comment-reply-{{comment_id}}" class="link comment-reply" title="Reply">
+          <span><i class="bi bi-chat"></i></span> <span class="reply-count">{{comment.replies.count}}</span>
+        </div>
+      </div>
+    </div>
+    <div id= "comment-replies-{{comment_id}}-list" class="col-12 mx-auto replies-list hide">    
+      <div class="col col-md-8 mx-auto" id="reply-form-{{comment_id}}">
+        <!-- view comment reply form -->
+      </div>      
+      <!-- Replies view -->
+      {% for reply in comment.replies.all %}
+        {% include "blog/comment__reply.html" with comment=reply %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endwith %}

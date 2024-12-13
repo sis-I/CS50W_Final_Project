@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %} &#8211; Sign in{% endblock %}
+
+{% block content %}
+
+<div class="login-box">
+    <div class="container ">
+        <div class="row text-center">
+            <div class="col-10 col-sm-8 col-md-6 col-lg-5 px-4 form-group rounded mx-auto shadow">
+                <h2 class="display-4 my-5">Login</h2>
+                {% if message %}
+                    <p class="error-msg">{{ message }}</p>
+                {% endif %}
+                <form action="{% url "accounts:login" %}" method="post">
+                    <div class="mb-5">
+                        <input required autofocus type="text" name="username" id="username" placeholder="Username" value="{{username}}" class="form-control ps-4 rounded-pill no-shadow">
+                        </div>
+                        <div class="mb-1">
+                            <input required type="password" name="password" id="password" placeholder="Password" value="{{password}}" class="form-control ps-4 rounded-pill no-shadow" >
+                        </div>
+                        <input type="hidden" name="next" value="{{next}}">
+                        {% comment %} {{ form.as_p }} {% endcomment %}
+                        {% csrf_token %}
+                        <div class="text-start mb-3 ps-4">
+                            <a href="{% url 'accounts:password_reset' %}" class="login-box-link">Forgot Password?</a>
+                        </div>
+                        <div class="mb-3">
+                            <input type="submit" class="btn w-100 blg-btn-primary rounded-pill" value="Login">
+                        </div>
+                    </form>
+                    <div class="col mb-5">
+                        <p>Do not you have an account? <strong><a href="{% url "accounts:signup" %}" class="login-box-link">Sign Up</a>.</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

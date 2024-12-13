@@ -1,0 +1,4 @@
+Django==4.2.11
+django-ckeditor==6.7.1 # used for blog post body/content editor
+django-js-asset==2.2.0
+Pillow==10.1.0 # for Image uploading & storing

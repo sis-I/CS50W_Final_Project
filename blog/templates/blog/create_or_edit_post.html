@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} &#8211; Write post{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col col-lg-8 mx-auto">
+        <div class=" mx-auto mt-4 p-3">
+          <form class="" action="/{{ url }}{% if post_id %}/{{ post_id }}{% if status %}/{{status}}{% endif %}{% endif %}" 
+                enctype="multipart/form-data" method="post">
+            {% if url == "new-story" %}
+              <h3 class=" display-5 mb-3 text-center">Create A Story</h3>
+            {% else %}
+              <h3 class=" display-5 mb-3 text-center">Edit Story</h3>
+            {% endif %}
+
+            {% if message %}
+            <div class="fs-5 ps-4">
+              {{ message }}
+            </div>
+            {% endif %}
+            <div class="form-control">
+              {{ form.media}}
+              <div class="mb-3">
+                <div class="mb-2">
+                  {{ form.title}}
+                </div>
+                <div class="mb-2">
+                  {{ form.subtitle}}
+                </div>
+                <div class="mb-2">
+                  <label class="ps-2 mb-1" for="featured_image">Featured Image: </label>
+                  <input type="file" class="form-control no-shadow" name="featured_image" 
+                  id="featured_image" placeholder="Choose" value="{% if post.featured_image %}{% static post.featured_image.url %}{% endif %}">
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control no-shadow" name="featured_image_caption" 
+                    value="{{ post.featured_image_caption }}" placeholder="Featured image caption">
+                </div>
+                <div class="mb-2">
+                  {{ form.content}}
+                </div>
+                {% comment %} {{ form.as_p }} {% endcomment %}
+              </div>
+
+              <!-- Tags input system -->
+              <div class="input-form mb-3">
+                <ul class="tags-box border mb-0" id"" name="tags-input">
+                  {% for tag in prev_tags %}
+                  <li class="btn btn-sm btn-blg-outline d-flex align-items-center rounded-pill mb-1">
+                    {{ tag.name }}
+                    <input type="hidden" name="tag" value="{{ tag.name}}">
+                    <span id="close-tag-{{tag.slug}}" name="{{tag.slug}}" class="bg-light ms-2 rounded-circle px-1">
+                      <i class="bi bi-x"></i>
+                    </span>
+                  </li>
+                  {% endfor %}
+                  <input type="text" placeholder="Tags here..." class="tag-input col">
+                </ul>
+                <div class="tag-search-result-box bg-gradient shadow hide rounded">
+                  <ul class="tag-query-list mb-0" style="margin-left: -32px;">
+                    <!-- Search result -->
+                  </ul>
+                </div>
+                <div class="small text-muted ps-2" style="margin-top: -2px;">
+                  Query for tags or enter tags and add comma after every tag. <strong>(Max 5 tags)</strong>
+                </div>
+              </div>
+              {% csrf_token %}   
+              {% if status is None %}
+              <div class="d-sm-flex mb-3 text-center justify-content-between justify-sm-content-start">
+                <div class="mb-2">
+                  <button class="btn blg-btn-success btn-sm rounded-pill" type="submit" name="save-to-draft">Save Draft</button>
+                </div>
+                {% comment %} <div class="mb-2">
+                  <button class="btn blg-btn-success btn-sm rounded-pill" type="submit" name="submit-to-publisher">Submit to Publisher</button>
+                </div> {% endcomment %}
+                <div class="mb-2">
+                  <button class="btn blg-btn-success btn-sm rounded-pill" type="submit" name="self-publish">Self-Publish</button>
+                </div>
+              </div> 
+              {% else %}
+                <div class="d-sm-flex mb-3 text-center justify-content-between justify-sm-content-start">
+                  <div class="mb-2">
+                    <a href="/" class="btn btn-sm rounded-pill" type="button" name="cancel">Cancel</a>
+                  </div>
+                  <div class="mb-2">
+                    <button class="btn blg-btn-success btn-sm rounded-pill" type="submit" name="update-story">Update</button>
+                  </div>
+                </div> 
+              {% endif %}         
+            </div>
+            
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock  %}
+
+{% block script %}
+<script>
+  const tagInput = document.querySelector('.tag-input');
+  const tagSearchResultBox = document.querySelector('.tag-search-result-box');
+  const tagsBox = document.querySelector('.tags-box');
+  const MAX_TAGS = 5; 
+
+  let tags = [];
+
+  // Global tags assignment for previously available tags
+  {% if prev_tags %}
+    tags = {{ prev_tags|safe}}
+  {% endif %}
+
+  // Check if 5 tags already there, and disable input
+  toggleInputDisable();
+
+  tagsBox.querySelectorAll('li span').forEach(span=> {
+        
+    // Remove tag when close (x) is clicked
+    span.addEventListener('click', () => {
+      removeTag(span);    
+    });
+  });
+  
+  // Search for existing tags when keyup
+  tagInput.addEventListener('keyup', async (e) => {
+    
+    tagSearchResultBox.classList.remove('hide');
+    
+    if (event.target.value === '') {
+      // Close result box and exit      
+      tagSearchResultBox.classList.add('hide');
+      return;
+    }
+
+    try {
+      // requesting for response 
+      const response = await fetch(`/search?q=${e.target.value}`);
+  
+      // Get json data 
+      const data = await response.json();
+      
+      if (data.people.length == 0 && data.tags.length == 0) {
+        tagSearchResultBox.classList.add('hide');
+  
+        // Comma separated tags
+        let tagName = e.target.value.trim().split(',')[0];
+  
+        // Add tags when comma (keyCode = 188) key hit and tag is not empty
+        if (e.keyCode === 188 && tagName !== '') {
+  
+          // Trim whitespaces at start and end, and get tag name before comma
+          let tagSlug = tagName.replace(/\s+/g, '-').toLowerCase(); // slugify
+          
+          // Change the first character of each word to Upper case
+          tagName = tagName.split(/\s+/g).map(word => 
+                                      word.charAt(0).toUpperCase() + word.slice(1)
+                                  ).join(' ');
+          
+          // Dictionary of newly created tags
+          let tagDict = {'slug': tagSlug, 'name': tagName};
+  
+          // Adding tags 
+          addTags(tagDict);
+  
+          // Remove tag when 'x' clicked
+          tagsBox.querySelectorAll('li span').forEach(span=> {
+            
+            // Remove tag when close (x) is clicked
+            span.addEventListener('click', () => {
+              removeTag(span);    
+            });
+          });
+  
+          e.target.value = '';
+          toggleInputDisable();
+  
+         return;
+        }
+  
+      }
+  
+      let tags_query_ul = tagSearchResultBox.querySelector('ul');
+  
+      let tag_query_html = '';
+  
+      // Search result of existing tags
+      data.tags.forEach(tag => {
+  
+        if (!tags.find(dict => dict.slug == tag.slug)) {
+          tag_query_html += `<li id="${tag.slug}" class="search-list-item">
+            ${tag.name}
+          </li>`;
+        }
+       
+      });
+  
+      tags_query_ul.innerHTML = tag_query_html;
+  
+      // Iterate through 
+      tags_query_ul.querySelectorAll('li').forEach(tag => {
+  
+        // Existing tag clicked
+        tag.addEventListener('click', (event) => {        
+          
+          let tagDict = {'slug': event.target.id, 'name': event.target.innerText};
+          
+          addTags(tagDict);
+  
+          tagsBox.querySelectorAll('li span').forEach(span=> {
+            
+            // Remove tag when close (x) is clicked
+            span.addEventListener('click', () => {
+              removeTag(span);    
+            });
+          });
+  
+          tagInput.value = '';        
+          tagSearchResultBox.classList.add('hide');
+  
+          toggleInputDisable();
+        });
+        
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+
+  });
+  
+  // Add tags function
+  function addTags(tagDict) {
+    // if already exist do not add tag 
+    if (tags.find(tag => tag.slug === tagDict.slug) || tags.length >= MAX_TAGS) {
+      return;
+    }
+
+    tags = [tagDict, ...tags]
+    
+    // Remove All tags
+    removeTags();
+
+    tags.forEach(tag => {
+
+      let liText = `
+        <li class="btn btn-sm btn-blg-outline d-flex align-items-center rounded-pill mb-1">
+          ${tag.name}
+          <input type="hidden" name="tag" value="${tag.name}">
+          <span id="close-tag-${tag.slug}" name="${tag.slug}" class="bg-light ms-2 rounded-circle px-1">
+            <i class="bi bi-x"></i>
+          </span>
+        </li>
+      `;
+  
+      tagsBox.insertAdjacentHTML('afterbegin', liText);
+    })
+  }
+
+  // Remove single tag
+  function removeTag(span) {
+
+    tags = tags.filter(tag => { return (tag.slug !== span.getAttribute('name')); });
+    span.parentElement.remove();
+
+    toggleInputDisable();
+  }
+
+  // Remove tags
+  function removeTags() {
+    tagsBox.querySelectorAll('li').forEach(tagbtn => {
+      tagbtn.remove();
+    })
+  }
+
+  //  Toggle tag input disable
+  function toggleInputDisable() {
+    if (tags.length >= MAX_TAGS) {
+      tagInput.disabled = true;
+      tagInput.placeholder = "Max tags added."
+    } else {
+      tagInput.disabled = false;
+      tagInput.placeholder = "Tags here...";
+    }
+  }
+
+</script>
+{% endblock %}

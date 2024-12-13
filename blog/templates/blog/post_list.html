@@ -1,0 +1,79 @@
+{% load static %}
+{% load custom_tags_filter %}
+
+{% for post in posts %}
+{% with post_id=post.id author=post.author content=post.content bookmarks=post.bookmarks.all %}
+  <div class="container post-container" id="post-{{post_id}}">
+    <div class="row author-pub-row align-items-center">
+      <div class="col-1 me-2 me-sm-0 prof-pic-section">
+        <a href="{% url "blog:user-profile" author %}" class="navlink-hvr">
+          {% if not author.profile.avatar  %}
+          <div class="prof-pic-anonymous">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          {% else %}
+          <img class="user-profile-img" src="{% static author.profile.avatar.url %}" alt="User profile picture">
+          {% endif %}
+        </a>	
+      </div>
+      <div class="col ">
+        <a href="{% url "blog:user-profile" author %}" class="link text-capitalize"><span class="lh-base author-name">{{ author }}</span></a>
+      </div>
+      <div class="col-4 text-secondary pub-date md-font">
+        {% with pub_date=post.published_on%}
+          {% if pub_date|my_timesince == pub_date %} 
+            {{ pub_date|date:"M d, y"}}
+          {% else %}
+            {{ pub_date|my_timesince }} ago
+          {% endif %}
+          <span class="member-only-flag"><i class="bi bi-person-x-fill"></i></span>
+        {% endwith %}
+      </div>
+    </div>
+    <div class="row post-title-img-row mt-2">
+			<div class="col-8">
+				<a class="link d-inline" 
+          href="{{ post.get_absolute_url }}">
+					<h4 class="title-of-post text-capitalize">{{ post.title }}</h4>
+					<div class="subtitle-or-body-text">
+						<!-- If post has subtitle show here or truncated body content -->
+						{% if post.subtitle %}
+						  <div class="lh-lg text-secondary">{{ post.subtitle }}</div>
+						{% else %}
+						  <div class="lh-lg text-secondary h5">{{ content|safe |truncatewords:8 }}</div>
+						{% endif %}            
+					</div>
+				</a>
+			</div>
+			<div class="col-3 featured-image">
+        {% if post.featured_image %}
+			    <img class="img-fluid" src="{% static post.featured_image.url %}" alt="blog post picture">
+        {% else %}
+          <img class="img-fluid" src="{% static "media/images/no_image_avail.png" %}" alt="No featured image avaiable">
+        {% endif %}
+			</div>
+    </div>
+    <div class="row bottom-row">
+      <div class="col-8">
+        <div class="d-flex gap-2 align-items-center sm-font">
+          {% for topic in post.tags.all %}
+            <a href="{% url "blog:tagged-stories" topic.tag.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{topic}}</a>
+          {% endfor %}
+          <span class="read-time text-secondary"><span class="read-min">{{content|safe|readmins }}</span>min read</span>
+        </div>
+      </div>
+      <div class="col-3 align-self-center">
+        {% with is_bookmark=user|item_exists:bookmarks %}
+        <!-- Save or Unsave This Post-->
+        <span id="bookmark_{{post_id}}" class="link bookmark" data-action="{% if is_bookmark %}un{% endif %}bookmark" title="{% if not is_bookmark %}Save to bookmark{% else %}Delete from bookmark{% endif %}">
+          <!-- implement bookmark -->
+          <span><i class="bi bi-bookmark-{% if is_bookmark %}fill{% else %}plus{% endif %} lg-font"></i></span>
+        </span>
+        {% endwith %}
+      </div>
+    </div>
+    <hr>
+  </div>
+{% endwith %}
+{% endfor %}
+

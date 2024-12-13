@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} &#8211; {{ tag }}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row my-5 text-center">
+            <div class="col-12 d-flex topic-section align-items-center">
+                <a class="btn btn-blg-secondary d-flex align-items-center gap-2 no-wrap rounded-pill" href="{% url 'blog:category-list' %}">
+                    <svg viewBox="0 0 24 24" fill="none" height="24" width="24">
+                        <circle cx="12" cy="12" r="10.5" stroke="currentColor"></circle>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M16.08 6.17l-.14.99-.99 6.63-.03.25-.22.12-5.9 3.2-.88.47.14-1 .99-6.63.03-.24.22-.12 5.9-3.2.88-.47zm-6.16 4.98L9.2 16l4.3-2.34-3.58-2.51zm4.16 1.7l-3.59-2.52L14.8 8l-.72 4.84z" fill="currentColor"></path>
+                    </svg>
+                    <span class="d-none d-md-inline md-font">
+                        Explore Topics
+                    </span>
+                </a>
+                {% if category %}
+                    <div class="scroll-btn left px-2">
+                        <i class="bi bi-chevron-left"></i>
+                    </div>
+                    <div class="d-flex gap-2 sm-font scroll-x">
+                        {% if not category.parent %}
+                            <!-- Category -->
+                            <a href="{% url "blog:tagged-stories" category.slug %}" class="btn rounded-pill blg-btn-secondary fw-bold sm-font no-wrap">{{category.name }}</a>
+                            <!-- Sub Category -->
+                            {% for child  in category.children.all %}
+                                <a href="{% url "blog:tagged-stories" child.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{child.name }}</a>
+                                <!-- Subsub category -->
+                                {% for subchild in  child.children.all %}
+                                    <a href="{% url "blog:tagged-stories" subchild.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{subchild.name }}</a>
+                                {% endfor %}
+                            {% endfor %}
+                        {% elif category.parent and category.children.count%}
+                        
+                            {% with parent=category.parent %}
+
+                                <a href="{% url "blog:tagged-stories" category.slug %}" class="btn rounded-pill blg-btn-secondary fw-bold sm-font no-wrap">{{category.name }}</a>
+                                <a href="{% url "blog:tagged-stories" parent.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{parent.name }}</a>
+                                
+                                {% for child in  category.children.all %}
+                                <a href="{% url "blog:tagged-stories" child.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{child.name }}</a>
+                                {% endfor %}
+                            {% endwith %}
+                        {% elif category.parent and not category.children.count %}
+                            {% with ancestor=category.parent.parent parent=category.parent %}
+                                <a href="{% url "blog:tagged-stories" category.slug %}" class="btn rounded-pill blg-btn-secondary fw-bold sm-font no-wrap">{{category.name }}</a>
+                                <a href="{% url "blog:tagged-stories" ancestor.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{ancestor.name }}</a>
+                                <a href="{% url "blog:tagged-stories" parent.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{parent.name }}</a>
+                                {% for child in parent.children.all %}
+                                    {% if child.slug != category.slug %}
+                                     <a href="{% url "blog:tagged-stories" child.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{child.name }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        
+                        {% endif %}
+                            
+                    </div>
+                    <div class="col-1 scroll-btn right px-2">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col mt-5">
+                <h1 class='fw-bold'>{{tag}}</h1>
+            </div>
+            <div class="col-12 mt-2 text-muted ">
+                <span>Topic &#x2022;</span> 
+                <span class="followers-count">{{ topic_followers.count }}</span> <span>Follower{{topic_followers.count | pluralize}}</span> &#x2022; 
+                <span class="stories-count">{{ posts.count}} </span>
+                Stor{% if posts.count > 1 or posts.count == 0 %}ies{% else %}y{% endif %}
+            </div>
+            <div class="col-12 mt-3">
+                <button id="follow-action" class="btn btn-blg-dark fw-bold md-font rounded-pill px-3"
+                data-action="{% if user in topic_followers %}un{% endif %}follow">
+                    Follow{% if user in topic_followers %}ed{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+   {% include "blog/post_list.html" %}
+{% endblock %}
+
+{% block script %}
+    <script src={% static 'js/util.js' %}></script>
+    <script>
+        const x_scroll = document.querySelector('.scroll-x');
+        const left = document.querySelector('.scroll-btn.left');
+        const right = document.querySelector('.scroll-btn.right');
+        if (left !== null && right !== null) {
+            left.addEventListener('click', ()=> {
+                x_scroll.scrollBy(-75, 0);
+            });
+            right.addEventListener('click', () => {
+                x_scroll.scrollBy(75, 0);
+            });
+        }
+
+        let tag_slug = '{{ tag_slug|safe }}';
+
+        const follow_btn = document.querySelector('#follow-action');
+
+        follow_btn.addEventListener('click', async() => {
+            let action = follow_btn.dataset.action
+            
+            try { 
+              
+                const response = await fetch(`/follow-topic/${tag_slug}`, {
+                                            method: 'POST',
+                                            headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': csrfToken, // Get csrfToken from util.js
+                                            },
+                                            body: JSON.stringify({
+                                                'action': action,
+                                            }),
+                                        });
+
+                const data =  await response.json();
+
+                if (data.error) return; // Exit if request has error
+    
+                const span_followers_count = document.querySelector('.followers-count');
+                let prev_followers_count = parseInt(span_followers_count.innerText);
+
+                span_followers_count.innerText = action === 'unfollow' ? prev_followers_count - 1 
+                                                                        : prev_followers_count + 1; 
+                
+                // Update follow button dataset action                                                    
+                follow_btn.dataset.action = action === 'unfollow' ? 'follow' : 'unfollow';
+                
+                // Update follow button content
+                follow_btn.innerHTML = action === 'unfollow' ? 'Follow' : 'Followed';
+            } catch(error) {
+                console.log(error);
+            } 
+
+        });
+
+        // BOOKMARK and UnBOOKMARK posts 
+        const bookmarkBtns = document.querySelectorAll('.bookmark');
+        if (bookmarkBtns !== null) {
+            bookmarkBtns.forEach(bookmarkBtn => {
+                bookmarkBtn.addEventListener('click', (e) => {   
+                    let post_id = bookmarkBtn.id.match(/\d+/)[0]
+
+                    // Fetch data  and toggle top and bottom bookmark icon
+                            
+                    fetchNToggle({
+                        btns: bookmarkBtn, 
+                        url:`/bookmark-post/${post_id}`,
+                        method: 'POST',
+                        action: bookmarkBtn.dataset.action,
+                        iconName: 'bookmark',
+                    }); // Bookmark on single post
+        
+                });
+            });
+        }
+
+    </script>
+{% endblock %}

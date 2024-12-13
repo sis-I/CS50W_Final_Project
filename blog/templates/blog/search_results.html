@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %} &#8211; Search Results {% endblock %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="row">
+      <div class="col-12 mt-5 header mx-auto">
+        <div class="h3">Result for <strong>{{query}}</strong></div>
+        <hr>
+      </div>
+      <div class="col-12 col-lg-8 mx-auto d-flex align-items-end fw-400 gap-2 mb-5 sub-header">
+        <div class="px-3 py-2 stories">
+          <a href="{% url 'blog:search-results' 'posts' %}?q={{query}}" id="posts" class="link {% if query_on == 'posts' %}selected{% endif %}" >
+            Stories
+          </a>
+          <sup class="superscript sm-font stories-count">{{posts_count}}</sup>
+        </div>
+        <!-- People results list  -->
+        <div class="px-3 py-2 people">
+          <a href="{% url 'blog:search-results' 'people' %}?q={{query}}" id="people" class="link {% if query_on == 'people' %}selected{% endif %}" >
+            Peole
+          </a>
+          <sup class="superscript sm-font people-count">{{ users_count }}</sup>
+        </div>
+        <div class="px-3 py-2 topics">
+          <a href="{% url 'blog:search-results' 'topics' %}?q={{query}}" id="topics" class="link {% if query_on == 'topics' %}selected{% endif %}" >
+            Topics
+          </a>
+          <sup class="superscript sm-font topics-count">{{ tag_count }}</sup>
+        </div>
+      </div>
+      {% if query_on == 'posts' %} 
+        <div class="col-12 col-lg-8 mx-auto public-post-lists mb-3">
+            <!-- Stories -->          
+            {% if not posts  %}
+            <p class="h3 text-center ">No results found in stories!</p>
+            {% else %}
+            {% include "blog/post_list.html" %}
+            {% endif %}
+        </div>
+      {% elif query_on == 'people' %}
+        <div class="col-12 col-lg-8 public-post-lists mb-3">
+            <!-- People -->  
+             <div class="container">
+                 <div class="row align-items-center mx-auto">
+                     {% for a_user in  users %}  
+                         {% include "blog/user_row.html" %}  
+                     {% empty %}
+                     <div class="mt-3">No results found in users!</div>
+                     {% endfor %}
+                 </div>     
+
+             </div> 
+        </div>
+    {% elif query_on == 'topics' %}
+        <div class="col-12 col-lg-8 topics-list mb-3">
+            <!-- Topics -->  
+            <div class="d-flex flex-wrap gap-2 align-items-center sm-font">
+                {% for topic in tags.all %}
+                    <a href="{% url "blog:tagged-stories" topic.slug %}" 
+                        class="btn rounded-pill blg-btn-secondary sm-font no-wrap">
+                        {{topic}}
+                    </a>
+                {% empty %}
+                    <div class="mt-3">No results found in topics!</div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script src="{% static "js/util.js" %}"></script>
+
+  <script>
+    
+    // BOOKMARK and UNBOOKMARK posts 
+    const bookmarkBtns = document.querySelectorAll('.bookmark');
+    if (bookmarkBtns !== null) {
+      bookmarkBtns.forEach(bookmarkBtn => {
+        bookmarkBtn.addEventListener('click', (e) => {   
+
+          let post_id = bookmarkBtn.id.match(/\d+/)[0];
+
+          // Fetch data and toggle top and bottom bookmark icon     
+          fetchNToggle({
+            btns: bookmarkBtn, 
+            url:`/bookmark-post/${post_id}`,
+            method: 'POST',
+            iconName: 'bookmark',
+          }); // Bookmark on single post
+    
+        });
+      });
+    }
+
+    // Follow/Unfollow user in the search result under people
+    const followBtns = document.querySelectorAll('.follow-action');
+    console.log(followBtns)
+    if (followBtns) {
+        followBtns.forEach(followBtn => {
+          followBtn.addEventListener('click', () => {
+            console.log(followBtn)
+            // Fetch follow api and toggle 
+            toggleFollow(followBtn);
+          })
+        })
+    }
+  </script>
+{% endblock %}

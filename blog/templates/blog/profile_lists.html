@@ -1,0 +1,10 @@
+{% extends "blog/profile.html" %}
+
+{% block profile_title %} &#8211; Lists{% endblock  %}
+
+{% block profile_content %}
+  <!-- Lists = Reading List saved by the user. (if user has listing ) -->
+  <div class="container" id="user-profile-lists-view">
+    {% include "blog/post_list.html" with posts=bookmarked_posts %}
+  </div>
+{% endblock %}

@@ -1,0 +1,906 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load custom_tags_filter %}
+
+{% block csrftoken_meta %}
+  {% comment %} <meta name="csrf-token" content="{{csrf_token}}"> {% endcomment %}
+{% endblock %}
+
+{% block title %} &#8211; {{ post.title }} {% endblock %}
+
+{% block content %}
+  <!-- All about detailed post -->
+   <!-- comments=post.comments.all -->
+  {% with post_id=post.id author=post.author title=post.title subtitle=post.subtitle  %}
+  {% with like_users=post.like_users.all profile=post.author.profile  %}
+  <div class="container">
+    <div class="row mt-5">
+      <div class="col-12 col-lg-8 mx-auto post-title mb-3">
+        <h2 class="display-5 fw-bold text-capitalize">{{ title }}</h2>
+      </div>
+      {% if subtitle %}
+        <div class="col-12 col-lg-8 mx-auto post-subtitle">
+          <p class="lh-lg text-muted fw-500">{{subtitle}}</p>
+        </div>
+      {% endif %}
+      <div class="col-12 col-lg-8 mx-auto mb-3 post-info">
+        <div class="row">
+          <div class="col-1 align-self-center">
+            {% if not author.profile.avatar %}
+              <span><i class="bi bi-person-circle" style="font-size: 1.5rem; color: gray;"></i></span>
+            {% else %}
+              <img class="user-profile-img" src="{% static author.profile.avatar.url %}" alt="User profile picture">
+            {% endif %}
+          </div>
+          <div class="col-11">
+            <span class="text-capitalize">
+              <!-- All links to user profile must have className username -->
+              <a href="{% url "blog:user-profile" author %}" class="link username">{{ author }}</a> 
+              <span>&#8226;</span> 
+              {% if user == author %}
+                <span class="delete-parent" >
+                  <span id="delete-{{post_id}}" class="link delete-btn">Delete</span>
+                  <!-- Delete Modal -->
+                  <div class="rounded shadow hide p-2 delete-modal-box" id="modal-box-{{post_id}}" >
+                    <div class="p-2 bg-white text-center">
+                      <span class=""><i class="bi bi-info-circle-fill"></i> <span>Are you sure you want to delete this post?</span></span>
+                    </div>
+                    <div class="d-flex justify-content-between my-3">
+                      <div class="btn close-btn">
+                        Cancel
+                      </div>
+                      <div class="">
+                        <form action="{% url "blog:delete_story" post_id %}" method="post">
+                          {% csrf_token %}
+                          <input type="hidden" value="{{post_id}}"/>
+                          <input class="btn" type="submit" value="Yes"/>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+                <span> &#8226; </span> 
+                <span>
+                  <a class="link-success" href="{% url "blog:edit_public_story" post_id status %}">Update</a>
+                </span>
+
+              {% else %}
+                <span class="link-success follow-action " id="follow-action-top" data-username="{{author}}">
+                  {% if user in author.followers.all %}Unfollow{%else%}Follow{% endif %}
+                </span>
+              {% endif %}
+            </span>
+            <div class="md-font">
+              <!--div class="md-font">
+                {% comment %} <span class="text-muted">Published in</span> Pulication Name {% endcomment %}
+              </div>-->
+              <span class="text-muted">
+                {% with pub_date=post.published_on update_date=post.updated_on %}
+                  <span class=""><span id="read-min">{{post.content |safe |readmins}}</span>min read </span>. {{ pub_date | date:"M d, y" }} 
+                  {% if pub_date != update_date %} 
+                  &#40;Updated 
+                    {% if update_date|my_timesince == update_date %}
+                      {{ update_date|date:"M d, y"}}&#41;
+                    {% else %}
+                      {{ update_date|my_timesince }} ago&#41;
+                    {% endif %}
+                  {% endif %}
+                  
+                {% endwith %}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Share this Post and (more?) -->
+      <div class="col-12 col-lg-8 mx-auto mb-3 py-2 border share-n-more">
+        <div class="d-flex flex-md-row-reverse gap-4 ">
+          <div class="share-post-top">
+            <!-- Share this post -->
+            <div class="link share-post-top-btn" title="Share">
+              <span><i class="bi bi-box-arrow-up lg-font"></i> Share</span>
+            </div>
+            <!-- Share Modal Box-->
+            <div class="rounded shadow share-modal-box-top p-2" id="">
+              <div class="border px-3 py-2 bg-white share-copy-item">
+                <span><i class="bi bi-link-45deg lg-font pe-2"></i>Copy link</span> 
+              </div>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  <a href="{% share_on_x post.get_absolute_url title %}" target="_blank" class="link" rel="noopener noreferrer">
+                    <span><i class="bi bi-twitter-x pe-2"></i>Share on X</span> 
+                  </a>
+                </li>
+                <li class="list-group-item">
+                  <a href="{% share_on_facebook post.get_absolute_url title %}" target="_blank" class="link" rel="noopener noreferrer">
+                    <span><i class="bi bi-facebook pe-2"></i> Share on Facebook</span>
+                  </a>
+                </li>
+                <li class="list-group-item">
+                  <a href="{% share_on_linkedin post.get_absolute_url title %}" target="_blank" class="link" rel="noopener noreferrer">
+                    <span><i class="bi bi-linkedin pe-2"></i> Share on LinkedIn</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="d-none d-md-block">
+
+            <!-- Save This Post-->
+            <span class="link bookmark" data-action="{% if bookmarked %}un{% endif %}bookmark" title="Save">
+              <!-- TODO implement bookmark -->
+              <span><i class="bi bi-bookmark-{% if not bookmarked %}plus{% else %}fill{% endif %} lg-font"></i></span>
+            </span>
+          </div>
+          <div class="col d-none d-md-block mw-100"></div>
+          <div class="d-none d-md-block">
+            <!-- This can be Form Asking Backend Asyncronously -->
+            <span class="link comment">
+              <span class="lg-font"><i class="bi bi-chat"></i></span>
+            </span>
+            <span class="text-muted total-comments">{{ comments.count |shortnum }}</span>
+          </div>
+          <div class="d-none d-md-block">
+            <!-- This can be Form Asking Backend Asyncronously -->
+            <span class="link like-action" data-action="{% if user in like_users%}un{% endif %}like">
+              <span class="lg-font" >
+                <i class="bi bi-hand-thumbs-up{% if user in like_users %}-fill{% endif %}"></i>
+              </span>
+              <span class="text-muted post_total-likes">{{ like_users.count|shortnum}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <!-- Put Image if any with its caption -->
+      <div class="col-12 col-lg-8 mx-auto mb-3 post-image-caption">
+        {% if post.featured_image %}
+          <img class="img-fluid" src="{% static post.featured_image.url %}" alt="Image of this Post">
+          {% if post.featured_image_caption %}<caption>{{ post.featured_image_caption }}</caption>{% endif %}
+        {% endif %}
+      </div>
+      <!-- Post content -->
+      <div class="col-12 col-lg-8 mx-auto mb-5 post-content">
+        {{ post.content | safe }}
+      </div>
+      <!-- Tags row -->
+      <div class="col-12 col-lg-8 d-flex align-items-center gap-2 mx-auto mb-5 tags">
+        Tags:
+        {% for topic in post.tags.all %}
+          {% with slug=topic.tag.slug %}
+            <a href="{% url "blog:tagged-stories" slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{topic}}</a>
+          {% endwith %}
+        {% endfor %}
+      </div>
+      <!-- User Reaction Section -->
+      <div class="col-12 col-lg-8 mx-auto mb-5 user-react-section">
+        <div class="row">
+          <div class="col d-flex text-nowrap gap-3 ">
+            <span>
+              <!-- This can be Form Asking Backend Asyncronously -->
+              <span class="link like-action" data-action="{% if user in like_users%}un{% endif %}like">
+                <span class="lg-font" >
+                  <i class="bi bi-hand-thumbs-up{% if user in like_users %}-fill{% endif %}"></i>
+                </span>
+                <span class="text-muted post_total-likes">{{ like_users.count |shortnum }}</span>
+              </span>
+            </span>
+            <span>
+              <!-- This can be Form Asking Backend Asyncronously -->
+              <span class="link comment">
+               <span class="lg-font"><i class="bi bi-chat"></i></span>
+              </span>
+             <span class="text-muted total-comments">{{ comments.count |shortnum }}</span>
+            </span>
+          </div>
+          <div class="col mw-100"></div>
+          <div class="col d-flex gap-3 justify-content-end">
+            <span>
+              <!-- Save This Post-->
+              <span class="link bookmark" data-action="{% if bookmarked %}un{% endif %}bookmark" title="Save">
+                <!-- implement bookmark -->
+                <span><i class="bi bi-bookmark-{% if not bookmarked %}plus{% else %}fill{% endif %} lg-font"></i></span>
+              </span>
+            </span>
+            <span>
+              <!-- TODO Share this post -->
+              <div class="share-post-bottom">
+                <div>
+                  <span class="link share-post-bottom-btn">
+                    <i class="bi bi-box-arrow-up lg-font"></i> <div class="d-none d-md-inline-block"> Share</div>
+                  </span>
+                </div>
+                <!-- Share Modal Box-->
+                <div class="rounded shadow share-modal-box-bottom p-2" id="">
+                  <div class="border px-3 py-2 bg-white share-copy-item">
+                    <span><i class="bi bi-link-45deg lg-font pe-2"></i>Copy link</span> 
+                  </div>
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                      <a href="{% share_on_x post.get_absolute_url title %}" target="_blank" class="link" rel="noopener noreferrer">
+                        <span><i class="bi bi-twitter-x pe-2"></i>Share on X</span> 
+                      </a>
+                    </li>
+                    <li class="list-group-item">
+                      <a href="{% share_on_facebook post.get_absolute_url title %}" target="_blank" class="link" rel="noopener noreferrer">
+                        <span><i class="bi bi-facebook pe-2"></i> Share on Facebook</span>
+                      </a>
+                    </li>
+                    <li class="list-group-item">
+                      <a href="{% share_on_linkedin post.get_absolute_url title %}" target="_blank" class="link" rel="noopener noreferrer">
+                        <span><i class="bi bi-linkedin pe-2"></i> Share on LinkedIn</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- comment Section  fullscreen or aside -->
+      <!--<div class="col-12 comment-section">
+        {% for comment in comments %}
+        {% empty %}
+          <div>Be the first to comment!</div>
+        {% endfor %}
+        <form action="">
+
+        </form>
+      </div>-->
+    </div>
+  </div>
+
+  <!-- All About the Author and Publication -->
+  <div class="bg-light mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 my-3 about-author-n-publication">
+          <div class="col-2 profile-photo">
+            {% if not profile.avatar %}
+            <div class="rounded-circle username-first" >
+              {{ author.username|first }}
+            </div>
+          {% else %}
+            <div class="">
+              <img class="img-fluid user-pic rounded-circle" src="{% static profile.avatar.url %}" alt="User profile picture">
+            </div>
+          {% endif %}
+          </div>
+          <div class="row">
+            <div class="col-7">
+              <span class="lg-font fw-600">Written by: <strong>{{ author.first_name|capfirst }} {{ author.last_name| capfirst }}</strong></span>
+              <br>
+              {% if profile.bio %}
+               <span>{{ profile.bio }}</span>
+              {% endif %}
+              <span class="follower-count">{{ author.followers.count }}</span> follower{{ author.followers.count|pluralize}} <!-- Writen for {Publication Name}-->
+              <br>
+              Job: 
+            </div>
+            <div class="col-5 d-flex align-items-center justify-content-end">
+              {% if user.username != author.username %}
+              <button class="btn btn-sm blg-btn-success " id="follow-action-bottom" data-username="{{author}}">
+                {% if user in author.followers.all %}Unfollow{%else%}Follow{% endif %}
+              </button> 
+              <button class="btn btn-sm blg-btn-success ms-2">Subscribe</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <!-- MORE POSTS FROM THIS AUTHOR -->
+        <div class="col more-posts-from-author-n-pub mt-5">
+          {% if author_posts.count != 0 %}
+          <div class="row ">
+            <p class="h5 mb-3 pb-3 border-bottom">More from <strong class="">u/{{author}}</strong> <!--and Publcation Name--></p>
+            {% comment %} <hr/> {% endcomment %}
+            {% for post in author_posts %}
+              <div class="col-6 col-md-6 mb-3 m-font fw-bold ">
+                <a class="link-none" href="{{ post.get_absolute_url }}">{{post.title }}</a>
+              </div>
+              {% if post.subtitle %}
+              <div class="col-6 col-md-6 mb-3 sm-font text-muted">{{ post.subtitle }}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment Section -->
+  <div class="comment-section" data-toggle="collapsed">
+    <div class="container">
+      <div class="row comment-box bg-white shadow border">
+        <div class="col-12 close-box text-end">
+          <span class="btn btn-sm cancel"><i class="bi bi-x lg-font"></i></span>
+        </div>
+        <div class="col-12 comment-list">
+          <!-- Include all comment list -->
+          {% for comment in comments %}
+            {% include "blog/comment__reply.html" %}
+          {% empty %}
+            <div class='fw-bold text-center'>Be the first to comment!</div>
+          {% endfor %}
+        </div>
+        <div class="col-12 col-sm-9 col-md-8 comment-input-form">
+          <form class="comment-form" action="{% url "blog:publish-comment" %}" method="post">
+            <input type="hidden" name="post_id" value="{{ post_id}}" />
+            {% csrf_token %}
+            <div class="container">
+              <div class="d-flex align-items-center gap-2 justify-content-center">
+                <div class="comment-textarea">
+                  {{ comment_form }}
+                </div>
+                <div class="">
+                  <input class="btn btn-sm blg-btn-success py-2 rounded" type="submit" value="Send">
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% endwith %}
+{% endblock %}
+
+{% block script %}
+  <!-- Access follow-toggling js file/module to get toggleFollow function -->
+  <script src="{% static "js/util.js" %}" ></script>
+
+  <script>
+    // Read time value in minutes
+    const postContent = document.querySelector('.post-content');
+    let readmin = readMinutes(postContent.innerText);
+
+    document.getElementById('read-min').innerHTML = readmin;
+
+    // Delete Post
+    const deleteBtn = document.querySelector('.delete-btn');
+    
+    if (deleteBtn !== null) {
+      const deleteModal = document.querySelector('.delete-modal-box');
+
+      deleteBtn.addEventListener('click', () => {
+        deleteModal.classList.remove("hide");
+
+        // Close the Delete Modal
+        document.addEventListener('click', closeDeleteModal);
+  
+      });
+      
+      // Close delete Modal function
+      const closeDeleteModal = (e) => {
+        let element = e.target;
+  
+        if (!element.closest('.delete-parent') || element.classList.contains('close-btn')) {
+          deleteModal.classList.add('hide');
+          document.removeEventListener('click', closeDeleteModal);
+        }
+      }
+
+    }
+
+    // Work with toggling of Follow functionality
+    const followBtns = document.querySelectorAll('#follow-action-top, #follow-action-bottom');
+    const followerCounts = document.querySelectorAll('.follower-count');
+
+    if (followBtns !== null) {
+      followBtns.forEach(followBtn => {
+        followBtn.addEventListener('click', () => { 
+          toggleFollow(followBtns, followerCounts);
+        });
+  
+      });
+      
+    }
+  
+    /* Working with Share post Modal in Detail Post view */
+    // Top Share Button
+    const shareTopBtn = document.querySelector('.share-post-top-btn');
+    const modalTop = document.querySelector('.share-modal-box-top');
+
+
+    shareTopBtn.addEventListener('click', () => {
+
+      modalTop.classList.add('show');
+      
+      //Exit the modal box when clicked outside
+      document.addEventListener('click', closeTopShareModal);
+
+      modalTop.querySelectorAll('.share-copy-item, ul li').forEach(shareItemBtn => {
+        shareItemBtn.addEventListener('click', (e) => {
+
+          if (e.target.closest('.share-copy-item')) {
+            // Copy the url to clipboard
+            navigator.clipboard.writeText(window.location.href);
+          }
+          
+          // Remove modal when each item clicked
+          modalTop.classList.remove('show');
+        })
+      })
+    });
+
+    // Bottom share button
+    const shareBottomBtn = document.querySelector('.share-post-bottom-btn');
+    const modalBottom = document.querySelector('.share-modal-box-bottom');
+    
+    shareBottomBtn.addEventListener('click', () => {
+    
+      modalBottom.classList.add('show');
+      
+      //Exit the modal box when clicked outside
+      document.addEventListener('click', closeBottomShareModal);
+
+      modalBottom.querySelectorAll('.share-copy-item, ul li').forEach(shareItemBtn => {
+        shareItemBtn.addEventListener('click', (e) => {
+
+          if (e.target.closest('.share-copy-item')) {
+            // Copy the url to clipboard
+            navigator.clipboard.writeText(window.location.href);
+          }
+
+          // Remove modal when click
+          modalBottom.classList.remove('show');
+        })
+      })
+
+    });
+
+    // Close modal function for the bottom share post modal
+    const closeTopShareModal = (e) => {
+      if (!e.target.closest('.share-post-top')) {
+        modalTop.classList.remove('show');   
+        document.removeEventListener('click', closeTopShareModal);      
+      }
+    }
+
+    // Close modal function for the bottom share post modal
+    const closeBottomShareModal = (e) => {
+      if (!e.target.closest('.share-post-bottom')) {
+        modalBottom.classList.remove('show');   
+        document.removeEventListener('click', closeBottomShareModal);      
+      }
+    }
+
+    // Like and Unlike posts 
+    const post_id = parseInt("{{ post.id }}");
+    const likeBtns = document.querySelectorAll('.like-action');
+
+    // For s
+    likeBtns.forEach(likeBtn => {
+      likeBtn.addEventListener('click', () => {
+        
+        // TODO: FOR ALL LIKE BUTTONS IN THE PAGE AND LIKE COUNTS
+        //fetchNToggleLike(likeBtn, {name: name, id: post_id}, likeBtns);      
+        fetchNToggle({
+          btns: likeBtns, 
+          url: `/like-post/${post_id}`,
+          method: 'PUT',
+          iconName: 'like',
+          like_on: 'post',
+        });
+      });
+    });
+    
+    // BOOKMARK and UnBOOKMARK posts 
+    const bookmarkBtns = document.querySelectorAll('.bookmark');
+    bookmarkBtns.forEach(bookmarkBtn => {
+      bookmarkBtn.addEventListener('click', (e) => {
+
+        // Fetch data  and toggle top and bottom bookmark icon
+        //fetchBookmarking(bookmarkBtn, {name: name, id: post_id}, bookmarkBtns);      
+        fetchNToggle({
+          btns: bookmarkBtns, 
+          url:`/bookmark-post/${post_id}`,
+          method: 'POST',
+          iconName: 'bookmark',
+          like_name: 'post',
+        });
+
+      });
+    });
+
+    // Comment Section
+    // Comment list
+    const comment_list = document.querySelector('.comment-list');    
+    const commentBtns = document.querySelectorAll('.comment');
+
+    commentBtns.forEach(commentBtn => {
+      commentBtn.addEventListener("click", () => {
+        
+        const commentSection = document.querySelector('.comment-section');
+
+        commentSection.dataset.toggle = 'expanded';
+                    
+        // close comment section
+        const closeBtn = document.querySelector('.cancel');
+
+        if (closeBtn != null) {
+
+          // Close Comment Section function
+          const closeCommentSection = () => {
+            const commentsecCollapsing = [
+              { transform: "translateY(0px)"},
+              { transform: "translateY(100vh)"},
+            ]
+
+            const timing = {
+              duration: 300,
+            }
+
+            commentSection.animate(commentsecCollapsing, timing);
+
+            // Wait 280ms to animation to finalize            
+            setTimeout(()=> {
+              commentSection.dataset.toggle = 'collapsed';
+            }, 280);
+          }
+
+          // Close comment section when close button clicked
+          closeBtn.onclick = closeCommentSection;
+        }
+        
+        
+      });
+    });
+    
+    // Sumbit Comment Form
+    const commentForm = document.querySelector('.comment-form');
+    const [topCommentCount, bottomCommentCount] = document.querySelectorAll('.total-comments');
+    
+    let wasSubmitted = false; // To prevent multiple form submit
+
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // If preveously submitted stop
+      if (wasSubmitted) {
+        return;
+      }
+
+      wasSubmitted = true;
+
+      const textarea = commentForm.querySelector('textarea');
+      const formData = new FormData(commentForm);     
+      const form_dict = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch(commentForm.action, {
+          method: 'POST',
+          headers: {
+            'Conetent-Type': 'application/json',
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Response was not ok');
+        }
+
+        const data = await response.json();
+        
+        if (data.error) {
+          console.log(data.error);
+          return;
+        }
+
+        // Create the comment row
+        const div = createCommentRow(data, textarea);
+
+        comment_list.prepend(div);
+
+        let prevCommentCount = parseInt(topCommentCount.innerText);
+        topCommentCount.innerText = bottomCommentCount.innerText = prevCommentCount + 1;
+
+        // Empty textarea input 
+        textarea.value = '';
+
+        wasSubmitted = false;
+
+      } catch (error) {
+        console.log(error)
+      }
+
+    });
+    
+    
+    // Create Element for comment row
+    function createCommentRow(data, textarea) {
+      
+      // Get comment id 
+      let current_comment_id = parseInt(data.comment_id);
+
+      // Create div
+      let div = document.createElement('div');
+      div.setAttribute('class', `container mt-2`);
+      div.setAttribute('id', `comment-row-${current_comment_id}`)
+      
+      // Current comment html
+      let commentRowhtml = `  
+        <div class="row md-font">
+          <div class="col-12 col-md-8 mx-auto">
+            <div class="d-flex gap-2 fw-600">
+              <div class="align-self-center">
+                <!-- TODO  __Implement the commenter avatar -->
+                {% if not user.profile.avatar %}
+                  <span><i class="bi bi-person-circle" style="font-size: 1.5rem; color: gray;"></i></span>
+                {% else %}
+                  <img class="user-profile-img" src="{% static user.profile.avatar.url %}" alt="User profile picture">
+                {% endif %}
+              </div>
+              <div class="">
+                <span class="text-capitalize">
+                  <!-- All links to user profile must have className username -->
+                  <a href="{% url 'blog:user-profile' user %}" class="link username">{{ user.first_name }} {{ user.last_name }}</a>
+                  <span> &#8226; </span> 
+                    <span class="delete-comment-parent" id="parent-${ current_comment_id }">
+                      <span id="comment-del-btn-${current_comment_id}" class="link delete-comment-btn">Delete</span>
+                      <!-- TODO: Delete Comment Modal -->
+                      <div class="rounded shadow hide border p-2 delete-comment-modal-box" id="delete-comment-modal-${current_comment_id}" >
+                        <div class="p-2 bg-white text-center">
+                          <span class=""><i class="bi bi-info-circle-fill"></i> <span>Are you sure you want to delete this comment?</span></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                          <div class="btn close-btn">
+                            Cancel
+                          </div>
+                          <div class="">
+                            <form action="/delete_comment/${current_comment_id}" method="post">
+                              {% csrf_token %}
+                              {% comment %} <input type="hidden" name="comment" value="{{comment_id}}"/> {% endcomment %}
+                              <input class="btn" type="submit" value="Yes"/>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                    <!-- TODO - IMPLEMENT EDIT FUNCTIONALITY -->
+                    <!--
+                    <span> &#8226; </span> 
+                    <span>
+                      <span class="text-muted" >Edit</span>
+                    </span> -->
+                </span>
+                <div class="">
+                  <!--div class="md-font">
+                    {% comment %} <span class="text-muted">Published in</span> Pulication Name {% endcomment %}
+                  </div>-->
+                  <span class="text-muted">
+                    {{ comment.created_on | timesince }} 
+                    <!--{% if post.published_on != post.updated_on %} 
+                      (Updated {{ post.updated_on | timesince }} ago)
+                    {% endif %}-->
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comment body -->
+          <div class="col-12 col-md-8 mx-auto pb-3 mt-2">
+            ${textarea.value}
+          </div>
+          <!-- Comment like & reply -->
+          <div class="col-12 col-md-8 mx-auto">
+            <div class="d-flex d-md-flex-none justify-content-between border-bottom pb-2">
+              <div class="link comment-like" id="comment-like-${current_comment_id}" data-action="{% if user in like_users %}un{% endif %}like">
+                <span><i class="bi bi-hand-thumbs-up{% if user in like_users %}-fill{% endif %}"></i></span>
+                <span class="comment_total-likes">0</span>
+              </div>
+              <div id="comment-reply-${current_comment_id}" class="link comment-reply" title="Reply">
+                <span><i class="bi bi-chat"></i></span> <span class="reply-count">0</span>
+              </div>
+            </div>
+          </div>
+          <div id= "comment-replies-${current_comment_id}-list" class="col-12 mx-auto replies-list hide">    
+            <div class="col col-md-8 mx-auto" id="reply-form-${current_comment_id}">
+              <!-- view comment reply form -->
+            </div>      
+            <!-- Replies view -->
+            {% for reply in comment.replies.all %}
+              {% include "blog/comment__reply.html" with comment=reply %}
+            {% endfor %}
+          </div>
+        </div>
+      `;
+
+      div.innerHTML = commentRowhtml;
+
+      return div;
+
+    }
+
+    const commentLikeBtns = document.querySelectorAll('.comment-like');
+    
+    commentLikeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        
+        let comment_id = parseInt(btn.id.match(/\d+/));
+
+        // fetch action for comment like toggling
+        fetchNToggle({
+          btns: btn, 
+          url: `/like-comment/${comment_id}`,
+          method: 'PUT',
+          iconName: 'like',
+          like_on: 'comment',
+        });
+      });
+    });
+
+
+    // Delete comments
+    const delCommentParentDivs = document.querySelectorAll('.delete-comment-parent');
+
+    delCommentParentDivs.forEach(parentDiv => {
+      const delBtn = parentDiv.querySelector('.delete-comment-btn');
+
+      delBtn.addEventListener('click', (e)=> {
+        let comment_id = parseInt(e.target.id.match(/\d+/)[0]);
+        
+        const repliesList = delBtn.closest('.replies-list');
+
+        // View delete modal box
+        const delCommentModal = document.querySelector(`#delete-comment-modal-${comment_id}`);
+        
+        // Remove all but current modal
+        document.querySelectorAll('.delete-comment-modal-box').forEach(delmodal => {
+          if (delmodal.id !== delCommentModal.id) {
+            delmodal.classList.add('hide');
+          } else {
+            delCommentModal.classList.remove('hide');
+          }
+        })
+        
+        // Submit delete
+        const delForm = parentDiv.querySelector('form');
+        delForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          let formData = new FormData(delForm);
+          
+          // GET CSRFToken value
+          const csrf_token = Object.fromEntries(formData)['csrfmiddlewaretoken'];
+          
+          const resp = await fetch(`${delForm.action}`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrf_token,
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const data = await resp.json();
+
+          if (!data.success) {
+            return;
+          }
+          
+          // Remove modal
+          delCommentModal.classList.add('hide');
+          
+          // Make sure if deletion is made on comment replies or parent comment
+          if (repliesList !== null) {
+
+            let parent_comment_id = repliesList.id.match(/\d+/)[0];
+
+            const commentReplyCountSpan = document.querySelector(`#comment-reply-${parent_comment_id}>span.reply-count`);
+            let prevReplyCount = parseInt(commentReplyCountSpan.innerText);
+
+            commentReplyCountSpan.innerText = prevReplyCount - 1;
+
+          } else {
+
+            // For Parent Comments  - decrease comment count by 1
+            let prevCommentCount = parseInt(topCommentCount.innerText);
+            topCommentCount.innerText = bottomCommentCount.innerText = prevCommentCount - 1;
+          }
+          // Remove current comment row
+          const commentRow = document.querySelector(`#comment-row-${comment_id}`);
+          commentRow.remove();
+          
+
+        });
+        
+        
+        const closeDelCommentModal = (e) => {
+          let elem = e.target;
+          // When cancel button clicked 
+          if (!elem.closest('.delete-comment-parent') || elem.classList.contains('close-btn')) {
+            delCommentModal.classList.add('hide');
+            document.removeEventListener('click', closeTopShareModal);
+          }
+        }
+        // Close modal box
+        document.addEventListener('click', closeDelCommentModal);
+        
+      });
+
+    });
+    
+    // Comment reply
+    const replyBtns = document.querySelectorAll('.comment-reply');
+    if (replyBtns !== null) {
+      replyBtns.forEach(replyBtn => {
+        replyBtn.addEventListener('click', (e) => {
+          
+          const comment_id = parseInt(replyBtn.id.match(/\d+/));
+          const comment_replies_list = document.querySelector(`#comment-replies-${comment_id}-list`);
+          
+          // Toggle comment replies list view
+          comment_replies_list.classList.toggle('hide');
+          
+          const replyFormDiv = document.querySelector(`#reply-form-${comment_id}`);
+        
+          let formHTML = `
+          <form action="/reply/${comment_id}" method="post">
+            <input type="hidden" name="post_id" value="${post_id}" required >
+            <input type="hidden" name="comment_id" value="${ comment_id}" required >
+            <textarea class="form-control rounded no-shadow txta-mod" name="body" placeholder="Reply here..." required></textarea>
+            <input class="btn btn-sm blg-btn-success py-0" type="submit" value="reply">
+          </form>
+          `;
+
+          replyFormDiv.innerHTML = formHTML;
+
+          const replyForm = replyFormDiv.querySelector("form");
+          
+          replyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(replyForm);
+            let csrfToken = getCookieValue('csrftoken');
+
+            if (wasSubmitted) { return;}
+            wasSubmitted = true;
+
+            try {
+        
+              const response = await fetch(`/reply/${comment_id}`, {
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken': csrfToken,
+                },
+                body: formData,
+              });
+        
+              if (!response.ok) {
+                throw Error("Response was not ok!")
+              }
+
+              const data = await response.json();
+        
+              if (!data.success) {
+                return;
+              }
+
+              const rowDiv = createCommentRow(data, replyForm.querySelector('textarea'));
+
+              // Add the row from start
+              comment_replies_list.prepend(rowDiv);
+
+              replyFormDiv.innerHTML = '';
+
+              // Increase reply count by 1
+              const replySpanCount = replyBtn.querySelector('.reply-count');
+              let prevReplyCount = parseInt(replySpanCount.innerText);
+              replySpanCount.innerText = prevReplyCount  +  1;
+
+              wasSubmitted = false;
+
+            } catch (error) {
+              console.log(error);
+            }
+          });
+        })
+      })
+    }
+
+  </script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% load static %}
+
+<div class="col-12 col-lg-8">
+  <div class="row mt-2">
+    <!-- User Image View (checked with membership (member or friend) mark)-->
+    <div class="col-1 p-0 prof-pic-section">
+      <a href="{% url "blog:user-profile" a_user.username %}" class="navlink-hvr">
+        {% if not a_user.profile.avatar  %}
+        <div class="prof-pic-anonymous">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        {% else %}
+        <img class="user-profile-img" src="{% static a_user.profile.avatar.url %}" alt="User profile picture">
+        {% endif %}
+      </a>	
+    <!--<img class="img-fluid rounded-circle" width="16" height="16" src="{% static "images/default.png" %}" alt="Profile-pic"> -->
+    </div>
+
+    <div class="col-8">
+      <div class="d-flex">
+        <!-- Username or firstname Lastname -->
+        <div class="username">{{ a_user.first_name }} {{ a_user.last_name }}</div>
+        
+        <!-- Bio If there is -->
+        {% if a_user.profile.bio %}
+        <span>  &#8226; </span>
+        <div class="bio">
+          {{ a_user.profile.bio | truncatewords:10 }}
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+    <div class="col-3">
+      <!-- Follow/unfollow Button (based on the viewing user follow or unfollow )-->
+      {% if user.username != a_user.username %}
+        <button id="follow-action-{{a_user.username}}" 
+          class="btn btn-sm blg-btn-success px-3 rounded-pill follow-action"
+          data-username="{{ a_user.username}}">
+            {% if a_user in user.followings.all %}Unfollow{% else %}Follow{% endif %}
+        </button>
+      {% endif %}
+    </div>      
+  </div>
+</div>

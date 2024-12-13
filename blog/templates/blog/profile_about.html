@@ -1,0 +1,268 @@
+{% extends "blog/profile.html" %}
+
+{% load static %}
+
+{% block profile_title %} &#8211; About {% endblock  %}
+
+{% block profile_content %}
+  <!-- About User Profile -->
+  <div class="container" id="user-profile-about-view">
+    {% comment %} <hr> {% endcomment %}
+    <div class="row md-font border-bottom">
+      <div class="col-12 mx-auto"></div>
+      <!-- IF user is authenticated and same user to profile user -->
+
+      <div class="col-12 user-profile-bio lg-font mb-2">
+        {% if profile.date_of_birth %} <p>Date of Birth: {{ profile.date_of_birth }}</p> {% endif %}
+        {% if profile.bio  %}<p>Bio: {{ profile.bio }}</p> {% endif %}
+      </div>
+      {% if user == profile_user %}
+        <div class="col-12 mx-auto bg-light p-5 ">
+          {% if not profile.bio %}<p>Tell the world about yourself.</p>{% endif %}
+          <button class="btn btn-sm blg-btn-outline-success rounded" id="get-started-button">Edit profile</button>
+        </div>
+      {% endif %}
+      <div class="col-12 user-profile--membership-info mb-2">
+        <p class="text-muted">Member of All-in (if a member) since Date <span>&#x2022;</span> Friend of All-in since Date <span>&#x2022;</span>
+          Editor of PublisherName
+        </p>
+      </div>
+      <div class="col-6 user-profile--follow-info mb-3">
+        <div class="d-flex justify-content-between">
+          <a href="{% url "blog:user-followers" username %}" class="link-success"><span>{{profile_user.followers.count}}</span> follower{{ profile_user.followers.count | pluralize }} </a>
+          <span> &#x2022; </span>
+          <a href="{% url "blog:user-followings" username %}" class="link-success">{{profile_user.followings.count}} Following{{ profile_user.followings.count | pluralize }}</a>
+        </div>
+      </div>
+      <div class="col-12 user-profile--social-media-contact mb-3">
+        Connect with me on <a class="link" href="https://twitter.com/@{{username}}" target="_blank"><i class="bi bi-twitter-x"></i></a>.        
+      </div>
+
+      <!-- User Profile Edit or Create Modal -->
+      <div class="user-profile-info--modal hide">
+        <div class="container">
+          <div class="row mt-5">
+            <div class="col-12 col-md-10 col-lg-8 p-3 profile-inner-modal rounded shadow">
+              <div class="row container mx-auto">
+                <div class="col-12 text-end">
+                  <button class="btn close"><span class="h4"><i class="bi bi-x-lg"></i></span></button>
+                </div>
+                <div class="col-12">
+                  <h4 class="text-center">Profile Information</h4>
+                </div>
+                <div class="col-12">
+                  <form class="row" id="profile-edit-create-form" action="{% url "blog:create-or-edit-profile" username %}" enctype="multipart/form-data" method="post" >
+                    {% csrf_token %} 
+                    <div class="col-12">
+                      <div class="row align-items-center">
+                        <div class="ms-2 col-3 profile-photo-edit-modal position-relative">
+                          
+                          {% if not profile.avatar %}
+                          <div class="rounded-circle xxl-font username-first" >
+                            {{ profile_user.username|first }}
+                          </div>
+                          {% else %}
+                          <div class="">
+                            <img id="image-preview" class="img-fluid user-pic rounded-circle" src="{% static profile.avatar.url %}" alt="User profile picture">
+                          </div>
+                          {% endif %}
+                          <!-- Temporary Profile Pic  to Preview -->
+                          <div id="temporary-pic-preview"></div>
+                          <div class="input-group rounded-circle">
+                            <label class="input-label" for="avatar-img">
+                              <span class="display-5 fw-bold"><i class="bi bi-plus-lg "></i></span>
+                            </label>
+                            <input class="form-control image-input opacity-0" type="file" id="avatar-img" name="avatar" accept="image/png, image/jpeg, image/gif">
+                          </div>          
+                        </div>
+                        <div class="col">
+                          <button class="btn remove-pic" type="button">Remove</button>
+                        </div>    
+                      </div>
+                      <div class="col sm-font mb-3">
+                        <strong>Photo</strong> (Please only upload image in .png, .jpeg, or .gif format)
+                      </div>
+                    </div>
+                    <div class="col-12 d-flex align-items-center gap-2 mb-3">
+                      <label for="date-of-birth" class="">Date of Birth:</label>
+                      <input class="form-control col no-shadow" type="date" name="date_of_birth" id="date-of-birth" /> <!--value="{{ profile.date_of_birth |safe }}"> -->
+                    </div>
+
+                    <div class="col-12 d-flex align-items-center gap-2 mb-3">
+                      <label for="bio">Bio: </label>
+                      <input class="form-control border-0 no-shadow bg-light" type="text" name="bio" id="bio" /> <!-- value="{{ profile.bio }}-->
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-3 ">
+                      <button class="btn btn-sm blg-btn-outline-success rounded-pill px-3 fw-500" type="reset">Cancel</button>
+                      <input class="btn btn-sm blg-btn-success rounded-pill px-3 fw-500" disabled type="submit" value="Save">
+                    </div>              
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    
+    const get_started = document.querySelector('#get-started-button');
+
+    if (get_started !== null) {
+      
+      const profile_form = document.querySelector('#profile-edit-create-form');  
+      const submit_btn = profile_form.querySelector('input[type=submit]');
+      const modal_box = document.querySelector('.user-profile-info--modal');
+      
+      get_started.addEventListener('click', (e) => { 
+
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Open modal box
+        modal_box.classList.remove('hide'); 
+
+        // Get all info
+        // getFormData(profile_form);
+        const inputs = profile_form.querySelectorAll('#avatar-img, #date-of-birth, #bio');
+        const [avatar_input, dofbirth_input, bio_input] = inputs;
+
+        let prev_values = []; 
+
+        fetch(`${window.location.href}/create-or-edit`)
+        .then(resp => resp.json())
+        .then(data => {
+          if (!data.error) {
+            inputs.forEach(input => {
+
+              if (input.type !== 'file') {
+                // Input name attribute value should be same as serialize key name
+                input.value = data[input.name]; 
+              }
+              
+              // Populate using data from server
+              prev_values.push(data[input.name] == null ? '' : data[input.name]) 
+              
+              // If one of content change active submit/save button
+              input.onchange = input.type === 'file' ? previewImage : handleChange;
+              
+            });
+
+          } 
+
+        })
+       .catch(error => console.log(error))
+     
+        // Input Image file upload and Preview
+        const profile_pic_edit_preview_box = document.querySelector('.profile-photo-edit-modal');
+        const parent_img_preview = document.querySelector("#temporary-pic-preview");
+ 
+        // Temporary image preview function
+        function previewImage() {
+          const image = avatar_input.files;
+
+          if (image) {
+            const temp_preview = document.createElement('img');
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => { 
+              const attrs = {
+                'src': e.target.result, 
+                'alt': "Image",
+                'class': 'img-fluid user-pic rounded-circle',
+              }
+
+              setAttributes(temp_preview, attrs);
+            }
+            
+            reader.readAsDataURL(image[0]);
+
+            parent_img_preview.append(temp_preview);
+
+            submit_btn.removeAttribute('disabled');
+          }
+
+        }
+
+        // Handle input change
+        function handleChange() {
+          for (let i = 0; i < inputs.length; i++) {
+            if (inputs[i].value !== prev_values[i]) { 
+              submit_btn.removeAttribute('disabled');
+              return;
+            }
+          }
+
+          // Check if submit button not disabled
+          if (!submit_btn.hasAttribute('disabled')) {
+            submit_btn.toggleAttribute('disabled');
+          }
+        }
+
+        // Cancel Event
+        avatar_input.addEventListener('cancel', () => {
+          console.log("Cancelled!!");
+        });
+
+        // Remove button click
+        const remove_img_btn = document.querySelector('.remove-pic');
+        remove_img_btn.addEventListener('click', handleFileRemove); //{once: true}
+
+        function handleFileRemove(e) {
+          if (parent_img_preview.firstChild && avatar_input.value !== '') {
+            avatar_input.value = '';
+            parent_img_preview.firstChild.remove();
+
+            // toggle submit button active or deactive        
+            handleChange();
+          }  
+
+        }
+
+        // Close modal box if clicked outside modal body or when close button clicked        
+        document.addEventListener('click', closeModalBox);
+
+         // Cancel Button Clicked
+        profile_form.querySelector('button[type=reset]').onclick = (e) => {
+
+          if (parent_img_preview.firstChild) { parent_img_preview.firstChild.remove(); }
+          
+          modal_box.classList.add('hide');
+        }
+
+      });
+
+      // Close Modal Function
+      function closeModalBox (e) {
+        // Handle Close when clicked outside
+        if (!document.querySelector('.profile-inner-modal').contains(e.target)) {
+
+          modal_box.classList.add('hide');
+          document.removeEventListener('click', closeModalBox);
+      
+        } else if (e.target.closest('.close')) { // when close button clicked
+          modal_box.classList.add('hide');
+          document.removeEventListener('click', closeModalBox);
+        }
+      }
+
+    }
+
+    // Function for Setting multiple Attributes
+    function setAttributes(elem, attrs) {
+      for(const [name, value] of Object.entries(attrs)) {
+        elem.setAttribute(name, value);
+      }
+    }
+
+    // Get Profile info
+
+    // Create or update
+
+  </script>
+{% endblock %}

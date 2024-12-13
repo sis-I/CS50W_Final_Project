@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %} &#8211; My Stories {% endblock %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="row">
+      <div class="col-12 mt-5 header">
+        <div class="h3">My stories</div>
+        <hr>
+      </div>
+      <div class="col-12 col-lg-8 mx-auto d-flex align-items-end fw-400 gap-2 mb-5 sub-header">
+        <div class="px-3 py-2 stories-drafts">
+          <a id="drafts" class="link {% if stories == 'drafts' %}selected{% endif %}" href="/me/stories/drafts">
+            Drafts
+          </a>
+          <!--<sup class="superscript sm-font draft-count">{{draft_count}}</sup>-->
+        </div>
+        <!-- Only If user has reading lists  -->
+        <div class="px-3 py-2 stories-published">
+          <a id="published" class="link {% if stories == 'published' %}selected{% endif %}" href="/me/stories/published">
+            Published
+          </a>
+          <!--<sup class="superscript sm-font public-count">{{ public_count }}</sup>-->
+        </div>
+        {% comment %} <div class="px-3 py-1 stories-submitted">
+          <div id="submitted" class="link">Submitted</div>
+        </div> {% endcomment %}
+      </div>
+      {% if stories == 'drafts' %} 
+        <div class="mx-auto col-12 col-lg-8 draft-post-lists">
+          {% for draft_post in posts %}
+            {% with post_id=draft_post.id %}
+            <!-- Drafts -->
+              <div id="draft-post-{{post_id}}" class="mb-3 d-flex gap-3 align-items-center" >
+                <div class="ps-3">
+                  <a href="{% url 'blog:edit_story' post_id %}" class="link-none display-5 text-truncate">{{ draft_post }}</a>
+                </div>
+                <div class="delete-parent">
+                  (<span id="delete-{{post_id}}" class="link delete-draft">Delete</span>)
+                  <div class="rounded shadow hide p-2 delete-modal-box" id="delete-modal-box-{{post_id}}">
+                    <div class="p-2 bg-white text-center">
+                      <span ><i class="bi bi-info-circle-fill lg-font "></i> Are you sure you want to delete this post?</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <div class="btn close-btn">
+                        Cancel
+                      </div>
+                      <div class="">
+                        <form action="{% url "blog:delete_story" post_id %}" method="post">
+                          {% csrf_token %}
+                          <input type="hidden" value="{{post_id}}"/>
+                          <input class="btn" type="submit" value="Yes"/>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr style="color: #ccc;"/>
+            {% endwith %}
+          {% empty %}
+            <div class="text-center mt-5">
+              No draft posts available. You may write your stories <a href="{% url 'blog:new_story' %}">here</a>.
+            </div>
+          {% endfor %}        
+        </div>
+      {% elif stories == 'published' %}
+        <div class="col-12 col-lg-8 mx-auto public-post-lists">
+          <!-- Published -->          
+          {% if not posts  %}
+            <p class="h3 text-center ">You have no published posts yet.</p>
+          {% else %}
+            {% include "blog/post_list.html" %}
+          {% endif %}
+        </div>
+      {% endif %}
+      </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script src="{% static "js/util.js" %}"></script>
+
+  <script>
+    // Delete Draft post 
+    const delParentDivs = document.querySelectorAll('.delete-parent');
+
+    delParentDivs.forEach(parentDiv => {
+      const delBtn = parentDiv.querySelector('.delete-draft');
+
+      delBtn.addEventListener('click', (e)=> {
+        let post_id = parseInt(e.target.id.match(/\d+/)[0]);
+              
+        // View delete modal box
+        const deleteModalBox = document.querySelector(`#delete-modal-box-${post_id}`);
+        
+        // Remove all but current modal
+        document.querySelectorAll('.delete-modal-box').forEach(delmodal => {
+          if (delmodal.id !== deleteModalBox.id && !delmodal.classList.contains('hide')) {
+            delmodal.classList.add('hide');
+          } else if (deleteModalBox.classList.contains('hide')) {
+            deleteModalBox.classList.remove('hide');
+          }
+        })
+        
+        // Submit delete
+        const delForm = parentDiv.querySelector('form');
+
+        let wasSubmitted = false;
+
+        delForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          // Do not Sumbit multiple times
+          if (wasSubmitted) {
+            return;
+          }
+          
+          // Now submit done
+          wasSubmitted = true;
+
+          let formData = new FormData(delForm);
+
+          // GET CSRFToken value
+          const csrf_token = Object.fromEntries(formData)['csrfmiddlewaretoken'];
+          
+          fetch(`${delForm.action}`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrf_token,
+              'Content-Type': 'application/json',
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            if (!data.success) {
+              wasSubmitted = false;
+              return;
+            }
+
+            // Remove modal
+            deleteModalBox.classList.add('hide');
+
+            // TODO: Put draft count by decreasing the count by 1
+            // const draftPostCount = document.querySelector('.draft-count');
+            // let prevDraftCount = parseInt(draftPostCount.innerText);
+            // draftPostCount.innerText = prevDraftCount - 1;
+            
+            // Remove current post row
+            const draftPostRow = document.querySelector(`#draft-post-${post_id}`);
+            draftPostRow.remove();
+
+            wasSubmitted = false;
+          })
+          .catch(error => console.log(error))
+            
+        });
+        
+        // Close Delete Function
+        const closeDeleteModal = (e) => {
+          let elem = e.target;
+          // Close Modal when cancel button clicked or outside the modal
+          if (!elem.closest('.delete-parent') || elem.classList.contains('close-btn')) {
+            deleteModalBox.classList.add('hide');
+            document.removeEventListener('click', closeDeleteModal);
+          }
+        }
+        
+        // Close modal box
+        document.addEventListener('click', closeDeleteModal);
+      });  
+    });
+    
+    // BOOKMARK and UNBOOKMARK posts 
+    const bookmarkBtns = document.querySelectorAll('.bookmark');
+    if (bookmarkBtns !== null) {
+      bookmarkBtns.forEach(bookmarkBtn => {
+        bookmarkBtn.addEventListener('click', (e) => {   
+
+          let post_id = bookmarkBtn.id.match(/\d+/)[0];
+
+          // Fetch data and toggle top and bottom bookmark icon     
+          fetchNToggle({
+            btns: bookmarkBtn, 
+            url:`/bookmark-post/${post_id}`,
+            method: 'POST',
+            iconName: 'bookmark',
+          }); // Bookmark on single post
+    
+        });
+      });
+    }
+  </script>
+{% endblock %}

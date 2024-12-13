@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSRFToken meta -->
+    {% block csrftoken_meta %}{% endblock %}
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
+    
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    
+    <!-- Static CSS -->
+    <link rel="stylesheet" href="{% static "css/main.css" %}">
+    
+    <title>ALL-in{% block title  %} {% endblock  %}</title>
+</head>
+<body>
+    <nav class="nav shadow">
+      <div class="container-fluid navbar-container">
+        <a class="navbar-brandname pe-3" href="/">ALL-in</a>    
+        {% if user.is_authenticated %}
+          <!-- Search Icon vissible in small device -->
+          <div class="search-box ">
+            <div class="search-icon">
+              <span class="pe-1"><i class="bi bi-search lg-font"></i></span>
+              <!-- Search bar and search result modal -->
+            </div>
+            <div class="search-bar-n-result-modal" data-toggle="collapsed">
+              <div class="nav-search border rounded-pill">
+                <form class="d-flex search-form" action="/search/posts" width="" role="search">
+                  <input class="form-control no-shadow ps-4 nav-search-input border-0 rounded-pill" type="search" name="q" placeholder="Search" aria-label="Search">
+                  <button class="btn border-0" type="submit">
+                    <span class=""><i class="bi bi-search lg-font"></i></span>
+                  </button>
+                  {% comment %} <button class="btn btn-outline-success" type="submit">Search</button> {% endcomment %}
+                </form>
+              </div>
+              <div class="search-results-list bg-gradient shadow p-3 hide">
+                <div class="people-query-list">
+                  PEOPLE
+                  <ul class="list-items border-bottom">
+                      <!--People result-->
+                  </ul>
+                </div>
+                {% comment %}<div class="publications-query-list">
+                  Publications
+                  <ul class="list-items">
+                     <li class="list-item">
+                      <a href="">Result A</a>
+                    </li> 
+                  </ul>
+                </div>{% endcomment %}
+                <div class="blog_post-query-list">
+                  POSTS
+                  <ul class="list-items border-bottom">
+                  </ul>
+                </div>
+                <div class="category-query-list">
+                  TOPICS
+                  <ul class="list-items">
+                    <!-- Topic results -->
+                  </ul>
+                </div>
+              </div>
+            </div>            
+          </div>
+        {% endif %}
+        
+        <div class="navbar-contents" id="navbar-contents-toggle" data-toggle="collapsed">
+          <ul class="navbar-links">
+            {% if not user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link navlink-hvr-border" href="#">Membership</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link navlink-hvr-border" href="#">About Us</a>
+              </li>            
+              <li class="nav-item">
+                <a class="nav-link navlink-hvr-border" href="{% url 'blog:new_story' %}">Write</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="left-content">          
+          <div class="nav-item">
+            <a class="nav-link navlink-hvr" href="{% url 'blog:new_story' %}">
+              <span title="Write"><i class="bi bi-pencil-square lg-font"></i> <span class="d-none d-sm-inline">Write</span></span>
+            </a>
+          </div>
+        </div>
+        <div class="user-menu-box">
+          <div class="" id="toggle-nav-contents">
+            {% if not user.profile.avatar %}
+            <button class="btn btn-sm blg-btn-success menu-user-profile rounded-circle" >
+              <span class="text-capitalize ">{{ user.username|first }}</span>
+            </button>
+            {% else %}
+            <div class="">
+              <img  class="img-fluid rounded-circle menu-user-profile" src="{% static user.profile.avatar.url %}" alt="User profile picture">
+            </div>
+            {% endif %}
+          </div>
+          <div class="user-menu-box-modal" data-toggle="collapsed">
+            <div class="menu-all-about-user shadow" >
+              <div class="profile-list nav-item-group">
+                <!-- Profile -->
+                <div class="nav-item mt-2">
+                  <a class="nav-link navlink-hvr" href="{% url 'blog:user-profile' user.username %}">
+                    <span class="md-font"> 
+                      {% if not user.profile.avatar %}
+                      <i class="bi bi-person-square lg-font me-3"></i>
+                      {%else %}
+                      <img class="user-profile-img-base me-3" src="{% static user.profile.avatar.url %}" alt="User profile picture">
+                      {% endif %} Profile
+                    </span>
+                  </a>
+                </div>
+                
+                <!-- Library -->
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr" href="{% url 'blog:library' 'bookmarks' %}">
+                    <span class="md-font "><i class="bi bi-bookmarks lg-font me-3"></i> Library</span>
+                  </a>
+                </div>
+                <!-- Stories -->
+                <div class="nav-item ">
+                  <a class="nav-link navlink-hvr" href="{% url "blog:stories" 'drafts' %}">
+                    <span class="md-font"><i class="bi bi-file-earmark-text lg-font me-3"></i> My Stories</span>
+                  </a>
+                </div>
+                <!-- Statistics  -->
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr" href="{% url "blog:stats" %}">
+                    <span class="md-font"><i class="bi bi-bar-chart lg-font me-3"></i> Stats</span>
+                  </a>
+                </div>
+              </div>
+              <hr>
+              <div class="settings-section">
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr md-font" href="#">Settings</a>
+                </div>
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr md-font" href="#">Manage publications</a>
+                </div>
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr md-font" href="#">Help</a>
+                </div>
+              </div>
+              <hr>
+              <div class="membership-section">
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr md-font" href="#">Become a member</a>
+                </div>
+              </div>
+              <hr>
+              <div class="logout-section">
+                <div class="nav-item">
+                  <a class="nav-link navlink-hvr-border md-font" href="{% url "accounts:logout" %}">Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+          <div class="auth-container ms-auto ">
+            <ul class="auth-contents">
+              <li class="nav-item navlink-hvr-border">
+                <a class="nav-link navlink-hvr-border" href="{% url "accounts:login" %}">Sign In</a>
+              </li>
+              <li class="nav-item">
+                <a href="{%  url "accounts:signup" %}" class="nav-link navlink-hvr-border">Sign Up</a>
+              </li>
+            </ul>
+          </div>
+          <button class="menu-icon menu-dim mx-3" id="toggle-nav-contents">
+            <span class="menu-top"></span>
+            <span class="menu-middle"></span>
+            <span class="menu-bottom"></span>
+          </button>
+        {% endif %}
+      </div>
+    </nav>
+    <div class="">
+      {% comment %} <p style="background-color: #4FB06D; color: white; padding: 40px;"></p> {% endcomment %}
+        {% block content %}{% endblock  %}
+    </div>
+
+    <div class="base-footer">
+      {% block footer %}
+      {% endblock %}
+    </div>
+    <!-- BOOTSTRAP JS -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>-->
+
+    {% block script %}
+    {% endblock %}
+    
+    <script>
+      let menuBtn = document.querySelector('.menu-icon');
+      const navContents = document.querySelector('#navbar-contents-toggle');
+
+      if (menuBtn !== null) {
+        menuBtn.addEventListener('click', () => { 
+          if (menuBtn.classList.toggle('open')) {
+            navContents.dataset.toggle = 'expanded';
+          } else {
+            navContents.dataset.toggle = 'collapsed';
+          }
+  
+        });
+      }
+      
+      // Search Icon Toggling
+      const searchIcon = document.querySelector('.search-icon');
+      const navSearch = document.querySelector('.nav-search');
+      const searchModal = document.querySelector('.search-bar-n-result-modal');
+      
+      if (searchIcon !== null) {
+
+        searchIcon.addEventListener('click', () => {
+          // Close Nav Search
+          searchModal.dataset.toggle = 'expanded';
+          searchIcon.classList.add('hide');
+  
+          // Clicking oustide of search box will close.
+          document.addEventListener('click', closeSearchBar);
+        });
+  
+        // Close Search Form
+        function closeSearchBar(event) {
+          if (!event.target.closest('.search-box')) {
+            searchIcon.classList.remove('hide');
+            searchModal.dataset.toggle = 'collapsed';
+            
+            // Remove previously added Event to close search bar
+            document.removeEventListener('click', closeSearchBar);
+          }
+        }
+      }
+
+      // Search for word
+      const searchInput = document.querySelector('.nav-search-input');
+      const searchResultBox = document.querySelector(".search-results-list");
+
+      if (searchInput !== null) {
+
+        searchInput.addEventListener('keyup', async (event) => {
+          // Show search result 
+          searchResultBox.classList.remove("hide");
+          
+          if (event.target.value == '') {
+            searchResultBox.classList.add('hide');
+            return;
+          }
+
+          try {
+            // requesting for response 
+            const response = await fetch(`/search?q=${event.target.value}`);
+  
+            // Get json response
+            const data = await response.json();
+
+            if (!data.people.length && !data.tags.length && !data.posts.length) {
+              searchResultBox.classList.add('hide');
+              return;
+            }
+            
+            const people_ul = document.querySelector('.people-query-list ul');
+            const post_ul = document.querySelector('.blog_post-query-list ul');
+            const category_ul = document.querySelector('.category-query-list ul');
+            
+            // Set time out for 1 seconds
+            setTimeout(()=> {         
+              
+              let people_html = '';
+              
+              data.people.forEach(person => {
+  
+                people_html += `<li class="search-list-item">
+                  <a href="/u/${person}" class="link-reg">${person}</a>
+                </li>`;
+              });
+              people_ul.innerHTML = people_html;
+  
+              // Posts list
+              let post_html = '';
+              data.posts.forEach(post => {
+                post_html += `<li class="search-list-item">
+                  <a href="${post.abs_url}" class="link-reg">${post.title}</a>
+                </li>`
+              });
+  
+            
+              // Topic lists
+              let category_html = '';
+              data.tags.forEach(tag => {
+                category_html += `<li class="search-list-item">
+                  <a href="/tag/${tag.slug}" class="link-reg">${tag.name}</a>
+                  </li>`
+                });
+              
+              
+              post_ul.innerHTML = post_html;
+              category_ul.innerHTML = category_html;
+              
+            }, 1000);
+            
+          } catch(error) { 
+            console.log(error);
+          }          
+        });       
+      }
+
+      // User Menu toggling 
+      const userMenu = document.querySelector('#toggle-nav-contents');
+      const userMenuBoxModal = document.querySelector(".user-menu-box-modal");
+      if (userMenu !== null) {
+        userMenu.addEventListener('click', () => {
+          userMenuBoxModal.dataset.toggle = 'expanded';
+
+          // Close the Menu
+          document.addEventListener('click', closeUserMenuModal);
+        })
+
+      }
+      // Close User Menu Modal 
+      function closeUserMenuModal(event) {
+        if (!event.target.closest('.user-menu-box')) {
+          userMenuBoxModal.dataset.toggle = "collapsed";
+          document.removeEventListener('click', closeUserMenuModal);
+        } 
+      }
+
+      /* Fixing Side sections */
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}
+{% block profile_title %} {% endblock %} &#8211; {{ username }}
+{% endblock %}
+
+{% block content %}
+  {% with req_username=user.username followers=profile_user.followers followings=profile_user.followings.all  %}
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-lg-8">
+        <div class="profile-header pt-5">
+          <div class="row">
+            <div class="col-12">
+              <div class="row align-items-center mb-3">
+                <div class="col-2 col-md-1 d-lg-none mx-auto  profile-photo">
+                  {% if not profile.avatar %}
+                    <div class="rounded-circle username-first" >
+                      {{ username|first }}
+                    </div>
+                  {% else %}
+                    <div class="">
+                      {% comment %} <img  class="img-fluid rounded-circle menu-user-profile" src="{% static "images/avatar/imgbin-avatar-drawing-redhead-avatar-woman-.jpg" %}" alt="User profile picture"> {% endcomment %}
+                      <img class="img-fluid user-pic rounded-circle" src="{% static profile.avatar.url %}" alt="User profile picture">
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="col-10 col-md-8 ps-0 ps-lg-4 me-md-auto">
+                  <h3 class="user-fullname mb-0 text-capitalize">{{ profile_user.first_name}} {{ profile_user.last_name}}</h3>
+                  <div class="d-md-none lh-sm fw-400 ">
+                    <a href="{% url "blog:user-followers" username %}" class="link-none">
+                      <span class="follower-count">{{ followers.count }}</span> Follower{{ followers.count | pluralize}}</a>
+                  </div>
+                </div>
+                {% if req_username != username %}
+                <div class="col-12 col-md-3 my-3 d-lg-none d-flex align-items-center justify-content-between justify-content-md-end gap-2 follow-subscribe-box">
+                  <button id="follow-action" class="btn blg-btn-success rounded-pill follow-action" data-username="{{username}}">
+                    {% if user in followers.all %}Unfollow{%else%}Follow{% endif %}
+                  </button>
+                  {% comment %} <div >
+                  </div> {% endcomment %}
+                  <div>
+                    <button class="btn blg-btn-success">Subscribe</button>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-12 d-flex align-items-end fw-500 mb-4 gap-2 sub-header">
+              <div class="px-3 py-2 profile_home ">
+                <a class="link-reg" href="{% url "blog:user-profile" username %}">Home</a>
+              </div>
+              <!-- Only if user has bookmark/reading lists  -->               
+              {% if req_username == username and has_bookmark %}
+              <div class="px-3 py-2 profile_lists">
+                <a class="link-reg" href="{% url "blog:user-profile-lists" username %}">Lists</a>
+              </div>
+              {% endif %}
+              <div class="px-3 py-2 profile_user_about">
+                <a class="link-reg" href="{% url "blog:user-profile-about" username %}">About</a>
+              </div>
+            </div>
+            <div class="col-12">
+              {% block profile_content %}
+              {% endblock %}
+            </div>
+            <!-- Home view List of user's own public posts -->
+            <div class="col-12 profile--home-view">
+                <!-- TODO: if posts exist show published posts otherwise notify user  -->
+                {% include "blog/post_list.html" %}
+            </div>
+          </div>
+        </div>  
+      </div>
+
+      <!-- About User Side Bar -->
+      <aside class="col-lg-4 py-5 aside lg-aside-sticky half-pos border-start">
+        <div class="container md-font">
+          <div class="row">
+            <div class="col-12 aside--profile-photo">
+              {% if not profile.avatar %}
+                <div class="rounded-circle username-first xxl-font" >
+                  {{ username|first }}
+                </div>
+              {% else %}
+                <div class="">
+                  <img class="img-fluid user-pic rounded-circle" src="{% static profile.avatar.url %}" alt="User profile picture">
+                </div>
+              {% endif %}
+            </div>
+            <div class="col-12 mb-3">
+              <h3 class="text-capitalize lg-font">{{ profile_user.first_name}} {{ profile_user.last_name}}</h3>
+              <div class="lh-sm fw-400 ">
+                <a href="{% url "blog:user-followers" username %}" class="link-none">
+                  <span class="follower-count">{{ followers.count }}</span> Follower{{followers.count | pluralize }}
+                </a>
+              </div>
+            </div>
+            <div class="col user-profile--membership-info mb-2">
+              <!--TODO  Check if user is a member or a friend or neither-->
+              {% if not True %}
+              <span><i class="bi bi-person-check"></i></span> Member of All-in (only if member)
+              {% elif not True %}
+              <span><i class="bi bi-patch-check-fill"></i></span> Friend of All-in (only if friend)
+              {% endif %}
+            </div>
+            <div class="col-12 user-profile-bio mb-2">
+              {% if profile.date_of_birth %} 
+                <p>Date of Birth: {{ profile.date_of_birth }}</p> 
+              {% endif %}
+              {% if profile.bio  %}<p>Bio: {{ profile.bio }}</p> {% endif %}
+            </div>
+
+            <!-- Follow and Subscribe buttons -->
+            {% if req_username != username %}
+            <div class="col-12 d-flex align-items-center gap-2 mb-3">
+              <button id="follow-action" class="btn btn-sm blg-btn-success py-2 px-3 rounded-pill follow-action"
+               data-username="{{username}}">
+                {% if user in followers.all %}Unfollow{% else %}Follow{% endif %}
+              </button>
+              {% comment %} <div >
+              </div> {% endcomment %}
+              <div>
+                <button class="btn btn-sm blg-btn-success py-2">Subscribe</button>
+              </div>
+            </div>
+            {% endif %}
+            <div class="col-12 user-profile-following-lists my-4">
+              <h5 class="n-font">Following</h5>
+              <p>List of Users Following this users</p>
+              {% for following in followings|slice:'6' %}
+                <a href="{% url 'blog:user-profile' following.username %}" class="link-none">{{ following|capfirst }}</p>
+              {% endfor %}
+              <a href="{% url "blog:user-followings" username %}" class="btn btn-sm blg-btn-secondary">Sea all</a>
+            </div>
+
+            <!--<div class="col-12 user-profile-lists mb-3">
+              <h5 class="n-font">Lists</h5>
+              All lists here
+              <button class="btn btn-sm blg-btn-secondary">Sea all</button>
+            </div>-->
+          </div>
+        </div>
+      </aside>
+
+    </div>  
+  </div>
+  {% endwith %}
+{% endblock %}
+
+{% block script %}
+  <!-- Access util.js file/module to get functions -->
+  <script src="{% static "js/util.js" %}" ></script>
+  <script>
+    // Work with toggling of Follow functionality
+    const followBtns = document.querySelectorAll('.follow-action');
+    const followerCounts = document.querySelectorAll('.follower-count');
+
+    followBtns.forEach(followBtn => {
+      followBtn.addEventListener('click', () => { 
+        // Fetch api and toggle follow
+        toggleFollow(followBtns, followerCounts);
+      });
+
+    });
+
+    // BOOKMARK and UNBOOKMARK posts 
+    const bookmarkBtns = document.querySelectorAll('.bookmark');
+    if (bookmarkBtns !== null) {
+      bookmarkBtns.forEach(bookmarkBtn => {
+        bookmarkBtn.addEventListener('click', (e) => {   
+
+          let post_id = bookmarkBtn.id.match(/\d+/)[0];
+
+          // Fetch data and toggle top and bottom bookmark icon     
+          fetchNToggle({
+            btns: bookmarkBtn, 
+            url:`/bookmark-post/${post_id}`,
+            method: 'POST',
+            iconName: 'bookmark',
+          }); // Bookmark on single post
+    
+        });
+      });
+    }
+    
+  </script>
+{% endblock  %} 

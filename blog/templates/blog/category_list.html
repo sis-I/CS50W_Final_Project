@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %} &#8211; Explore Topics{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h3 class="display-4 fw-bold mb-4">Explore Topics</h3>
+        </div>
+    {% for category in categories %}
+        {% with cat_id=category.id %}
+        <div class="list-group col-12 py-2">
+            <div class="d-flex list-group-item justify-content-between border-0">
+                <h3 class="">
+                    <a href="{% url "blog:tagged-stories" category.slug %}" class="link">{{category.name }}</a>
+                </h3>
+                <div class="accordion-header"  id="accordion_{{cat_id}}">
+                    <i class="bi bi-chevron-down h3"></i>
+                </div>
+            </div>
+            <div class="hide cat_list-group col-12" id="list-item_{{cat_id}}">
+                <div class="ps-4">
+                    <a href="{% url "blog:tagged-stories" category.slug %}" class="cat_list-item h5 lg-font">{{category.name }}</a>
+                </div>
+                <ul class="cat_list-group">
+                    {% for child in category.children.all %}
+                    <li class="cat_list-item">
+                        <a href="{% url "blog:tagged-stories" child.slug %}" class="cat_list-item ">{{child.name }}</a>
+                        <ul class="cat_list-group">
+                            {% for subchild in  child.children.all %}
+                            <li class="cat_list-item">
+                                <a href="{% url "blog:tagged-stories" subchild.slug %}" class="text-muted md-font cat_list-item">{{subchild.name }}</a>
+                            </li>                            
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+        
+            </div>
+        </div>
+        {% endwith %}
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        const accordionItems = document.querySelectorAll('.accordion-header');
+
+        accordionItems.forEach(accordion_item => {
+            accordion_item.addEventListener('click', (e) => {
+                const chevron = accordion_item.querySelector('i');
+                let id_num = accordion_item.id.split('_')[1]
+                const list_item = document.querySelector(`#list-item_${id_num}`);
+
+                if (list_item.classList.toggle('hide')) {
+                    chevron.classList.remove('bi-chevron-up');
+                    chevron.classList.add('bi-chevron-down');
+                } else {
+                    chevron.classList.remove('bi-chevron-down');
+                    chevron.classList.add('bi-chevron-up');
+                }
+            });
+        });
+    </script>
+{% endblock %}

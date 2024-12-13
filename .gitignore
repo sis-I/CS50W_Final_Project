@@ -1,0 +1,11 @@
+//*.json
+**/node_modules/
+
+**/__pycache__/
+
+#Python #
+*.py[cod]
+*$py.class
+
+# Microsoft Edge Web Driver
+**/edgedriver_win64/

@@ -35,7 +35,7 @@ This project is complex that includes:
 
 ### Django built-in Files and Folders
 
-#### Under `capstone` folder
+#### Under `finalproject` folder
 - `settings.py`: responsible of different configurations and app registration
 - `urls.py`: urls of the project apps will be registered here
 
@@ -132,11 +132,7 @@ Under `custom_decorators/` folder
 
 .   Clone repository
 
-    >> git clone https://github.com/me50/sis-I.git/web50/projects/2020/x/capstone
-    
-.   Change directory to capstone
-
-    >> cd capstone
+    $ git clone git@github.com:sis-I/CS50W_Final_Project.git
 
 .   Install all neccessary dependencies
 

@@ -9,3 +9,6 @@
 
 # Microsoft Edge Web Driver
 **/edgedriver_win64/
+
+# python env
+**/venv/

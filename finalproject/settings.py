@@ -11,6 +11,16 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from os import getenv
+
+from dotenv import load_dotenv
+from urllib.parse import urlparse
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Parse database configuration from $DATABASE_URL
+PSDB = urlparse(getenv('DATABASE_URL'))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +35,7 @@ SECRET_KEY = '^ucxw04+&_v9#^@+h(uzgft90m9movlmlle-scqh_(b49kfz&&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -82,8 +92,15 @@ WSGI_APPLICATION = 'finalproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': PSDB.path[1:],
+        'USER': PSDB.username,
+        'PASSWORD': PSDB.password,  
+        'HOST': PSDB.hostname,
+        'PORT': int(getenv('PORT', '5432')),
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
     }
 }
 

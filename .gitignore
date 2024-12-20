@@ -12,3 +12,5 @@
 
 # python env
 **/venv/
+.python-version
+.env

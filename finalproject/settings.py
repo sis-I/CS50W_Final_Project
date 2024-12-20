@@ -93,14 +93,17 @@ WSGI_APPLICATION = 'finalproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': PSDB.path[1:],
-        'USER': PSDB.username,
-        'PASSWORD': PSDB.password,  
-        'HOST': PSDB.hostname,
-        'PORT': int(getenv('PORT', '5432')),
-        'OPTIONS': {
-            'sslmode': 'require',
-        }
+        'NAME': getenv('DBNAME'), #PSDB.path[1:],
+        'USER': getenv('DBUSER'),#PSDB.username,
+        'PASSWORD': getenv('DBPASSWORD'), #PSDB.password,  
+        'HOST': getenv('DBHOST'), #PSDB.hostname,
+        'PORT': getenv('DBPORT', '5432'),
+        # 'OPTIONS': {
+        #     'sslmode': 'require',
+        # }
+
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': 'db.sqlite3',
     }
 }
 
@@ -126,7 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'

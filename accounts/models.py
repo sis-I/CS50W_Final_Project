@@ -15,7 +15,7 @@ class User(AbstractUser):
                                 content_type_field='content_type',
                                 related_query_name='topic_followers')
    
-    REQUIRED_FIELDS = ['interests']
+    # REQUIRED_FIELDS = ['interests']
 
 
 class UserRole(models.Model):

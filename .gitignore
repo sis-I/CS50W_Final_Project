@@ -17,3 +17,6 @@
 
 # sqlite db
 db.sqlite3
+
+# static files
+/staticfiles_build/

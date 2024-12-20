@@ -33,7 +33,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '^ucxw04+&_v9#^@+h(uzgft90m9movlmlle-scqh_(b49kfz&&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
 
@@ -93,14 +93,14 @@ WSGI_APPLICATION = 'finalproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': getenv('DBNAME'), #PSDB.path[1:],
-        'USER': getenv('DBUSER'),#PSDB.username,
-        'PASSWORD': getenv('DBPASSWORD'), #PSDB.password,  
-        'HOST': getenv('DBHOST'), #PSDB.hostname,
+        'NAME':  PSDB.path[1:], #getenv('DBNAME'), #PSDB.path[1:],
+        'USER': PSDB.username, #getenv('DBUSER'),
+        'PASSWORD': PSDB.password, #getenv('DBPASSWORD'),   
+        'HOST': PSDB.hostname, #getenv('DBHOST'),
         'PORT': getenv('DBPORT', '5432'),
-        # 'OPTIONS': {
-        #     'sslmode': 'require',
-        # }
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
 
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': 'db.sqlite3',

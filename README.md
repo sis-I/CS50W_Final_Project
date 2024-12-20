@@ -40,7 +40,7 @@ This project is complex that includes:
 - `urls.py`: urls of the project apps will be registered here
 
 ####  Database
-- `db.sqlite3`: Sqlite3 database of the project
+- PostgreSQL database is used, unlike using Sqlite for development purposes. It will be deployed on free hosting website, such as Vercel.
 
 #### Base Templates
  - `base.html`: for common html navbars, nav menu, search bar, right side offcanvas box. and registers all frontend dependencies like css, bootstrap and common JavaScript applictions
@@ -141,10 +141,11 @@ Under `custom_decorators/` folder
 .   Initiate all created models as migration files and then apply these migrations to the database corresponding tables
 
     >> python manage.py makemigrations
-    >> python manage.py migrate`
+    >> python manage.py migrate
+    
 .   Create web sites admin by 
 
-    >> django-admin createsuperuser
+    >> python manage.py createsuperuser
 
 .   Start the server 
 

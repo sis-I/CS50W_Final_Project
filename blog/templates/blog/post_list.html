@@ -38,9 +38,9 @@
 					<div class="subtitle-or-body-text">
 						<!-- If post has subtitle show here or truncated body content -->
 						{% if post.subtitle %}
-						  <div class="lh-lg text-secondary">{{ post.subtitle }}</div>
+						  <div class="text-secondary">{{ post.subtitle }}</div>
 						{% else %}
-						  <div class="lh-lg text-secondary h5">{{ content|safe |truncatewords:8 }}</div>
+						  <div class="text-secondary h5">{{ content|safe |truncatewords:8 }}</div>
 						{% endif %}            
 					</div>
 				</a>
@@ -53,13 +53,17 @@
         {% endif %}
 			</div>
     </div>
-    <div class="row bottom-row">
+    <div class="row">
       <div class="col-8">
-        <div class="d-flex gap-2 align-items-center sm-font">
-          {% for topic in post.tags.all %}
-            <a href="{% url "blog:tagged-stories" topic.tag.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{topic}}</a>
-          {% endfor %}
-          <span class="read-time text-secondary"><span class="read-min">{{content|safe|readmins }}</span>min read</span>
+        <div class="row align-items-center sm-font">
+          <div class="col-10 d-flex gap-1 px-2 scroll-x">
+            {% for topic in post.tags.all %}
+              <a href="{% url "blog:tagged-stories" topic.tag.slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{topic}}</a>
+            {% endfor %}
+          </div>
+          <div class="col-2 read-time text-secondary px-0">
+            <span><span class="read-min">{{ content|safe|readmins }}</span>min read</span>
+          </div>
         </div>
       </div>
       <div class="col-3 align-self-center">

@@ -14,6 +14,10 @@ echo "Model migrations into database"
 python3.12 manage.py makemigrations
 python3.12 manage.py migrate
 
+# echo "load data into database"
+
+# python3.12 manage.py loaddata tag.json
+# python3.12 manage.py loaddata category.json
 
 echo "Collect all static files" 
 

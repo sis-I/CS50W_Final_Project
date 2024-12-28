@@ -10,9 +10,12 @@
 # Microsoft Edge Web Driver
 **/edgedriver_win64/
 
-# python env
+# Python env
 **/venv/
+.venv
 .python-version
+
+# Environments
 .env
 
 # sqlite db
@@ -20,3 +23,4 @@ db.sqlite3
 
 # static files
 /staticfiles_build/
+/staticfiles/

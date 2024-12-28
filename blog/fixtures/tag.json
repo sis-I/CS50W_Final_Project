@@ -1,0 +1,466 @@
+[
+{
+  "model": "blog.tag",
+  "pk": 1,
+  "fields": {
+    "name": "Work",
+    "slug": "work"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 2,
+  "fields": {
+    "name": "Technology",
+    "slug": "technology"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 3,
+  "fields": {
+    "name": "Software Development",
+    "slug": "software-development"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 4,
+  "fields": {
+    "name": "Programming",
+    "slug": "programming"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 5,
+  "fields": {
+    "name": "Coding",
+    "slug": "coding"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 6,
+  "fields": {
+    "name": "Frontend Engineering",
+    "slug": "frontend-engineering"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 7,
+  "fields": {
+    "name": "Backend Engineering",
+    "slug": "backend-engineering"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 8,
+  "fields": {
+    "name": "Culture",
+    "slug": "culture"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 9,
+  "fields": {
+    "name": "Media",
+    "slug": "media"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 10,
+  "fields": {
+    "name": "Self Improvement",
+    "slug": "self-improvement"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 11,
+  "fields": {
+    "name": "Mental Health",
+    "slug": "mental-health"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 12,
+  "fields": {
+    "name": "Self-awareness",
+    "slug": "self-awareness"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 13,
+  "fields": {
+    "name": "Therapy",
+    "slug": "therapy"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 14,
+  "fields": {
+    "name": "Life Lessons",
+    "slug": "life-lessons"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 15,
+  "fields": {
+    "name": "Productivity",
+    "slug": "productivity"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 16,
+  "fields": {
+    "name": "Work Life Balance",
+    "slug": "work-life-balance"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 17,
+  "fields": {
+    "name": "Career Advice",
+    "slug": "career-advice"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 18,
+  "fields": {
+    "name": "Artificial Intelligence",
+    "slug": "artificial-intelligence"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 19,
+  "fields": {
+    "name": "Large Language Model",
+    "slug": "large-language-model"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 20,
+  "fields": {
+    "name": "Deep Learning",
+    "slug": "deep-learning"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 21,
+  "fields": {
+    "name": "Machine Learning",
+    "slug": "machine-learning"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 22,
+  "fields": {
+    "name": "Data Science",
+    "slug": "data-science"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 23,
+  "fields": {
+    "name": "Analytics",
+    "slug": "analytics"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 24,
+  "fields": {
+    "name": "Data Engineering",
+    "slug": "data-engineering"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 25,
+  "fields": {
+    "name": "SQL",
+    "slug": "sql"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 26,
+  "fields": {
+    "name": "Programming Langauages",
+    "slug": "programming-langauages"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 27,
+  "fields": {
+    "name": "HTML",
+    "slug": "html"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 28,
+  "fields": {
+    "name": "CSS",
+    "slug": "css"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 29,
+  "fields": {
+    "name": "JavaScript",
+    "slug": "javascript"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 30,
+  "fields": {
+    "name": "Python",
+    "slug": "python"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 31,
+  "fields": {
+    "name": "React",
+    "slug": "react"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 32,
+  "fields": {
+    "name": "Writing",
+    "slug": "writing"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 33,
+  "fields": {
+    "name": "Fiction",
+    "slug": "fiction"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 34,
+  "fields": {
+    "name": "Poetry",
+    "slug": "poetry"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 35,
+  "fields": {
+    "name": "Short Stories",
+    "slug": "short-stories"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 36,
+  "fields": {
+    "name": "Books",
+    "slug": "books"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 37,
+  "fields": {
+    "name": "Book Review",
+    "slug": "book-review"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 38,
+  "fields": {
+    "name": "Screenwriting",
+    "slug": "screenwriting"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 39,
+  "fields": {
+    "name": "Playwriting",
+    "slug": "playwriting"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 40,
+  "fields": {
+    "name": "Society",
+    "slug": "society"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 41,
+  "fields": {
+    "name": "Politics",
+    "slug": "politics"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 42,
+  "fields": {
+    "name": "Government",
+    "slug": "government"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 43,
+  "fields": {
+    "name": "Political Parties",
+    "slug": "political-parties"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 44,
+  "fields": {
+    "name": "Fashion",
+    "slug": "fashion"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 45,
+  "fields": {
+    "name": "Sports",
+    "slug": "sports"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 46,
+  "fields": {
+    "name": "Football",
+    "slug": "football"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 47,
+  "fields": {
+    "name": "Athletics",
+    "slug": "athletics"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 48,
+  "fields": {
+    "name": "Remote Work",
+    "slug": "remote-work"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 49,
+  "fields": {
+    "name": "Digital Nomads",
+    "slug": "digital-nomads"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 50,
+  "fields": {
+    "name": "Future Of Work",
+    "slug": "future-of-work"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 51,
+  "fields": {
+    "name": "Work From Home",
+    "slug": "work-from-home"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 52,
+  "fields": {
+    "name": "Business",
+    "slug": "business"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 53,
+  "fields": {
+    "name": "Freelancing",
+    "slug": "freelancing"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 54,
+  "fields": {
+    "name": "Startups",
+    "slug": "startups"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 55,
+  "fields": {
+    "name": "Marketing",
+    "slug": "marketing"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 56,
+  "fields": {
+    "name": "Advertising",
+    "slug": "advertising"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 57,
+  "fields": {
+    "name": "Branding",
+    "slug": "branding"
+  }
+},
+{
+  "model": "blog.tag",
+  "pk": 58,
+  "fields": {
+    "name": "Digital Marketing",
+    "slug": "digital-marketing"
+  }
+}
+]

@@ -21,7 +21,7 @@
       </div>
       {% if subtitle %}
         <div class="col-12 col-lg-8 mx-auto post-subtitle">
-          <p class="lh-lg text-muted fw-500">{{subtitle}}</p>
+          <p class="lh-base text-muted fw-500">{{subtitle}}</p>
         </div>
       {% endif %}
       <div class="col-12 col-lg-8 mx-auto mb-3 post-info">
@@ -153,10 +153,16 @@
         </div>
       </div>
       <!-- Put Image if any with its caption -->
-      <div class="col-12 col-lg-8 mx-auto mb-3 post-image-caption">
+      <div class="col-12 col-lg-8 text-center mx-auto mb-3 text-secondary sm-font post-image-caption">
         {% if post.featured_image %}
-          <img class="img-fluid" src="{% static post.featured_image.url %}" alt="Image of this Post">
-          {% if post.featured_image_caption %}<caption>{{ post.featured_image_caption }}</caption>{% endif %}
+          <div class="col-12 ">
+            <img class="img-fluid mb-2" src="{% static post.featured_image.url %}" alt="Image of this Post">
+          </div>
+          {% if post.featured_image_caption %}
+            <caption>
+              {{ post.featured_image_caption }}
+            </caption>
+          {% endif %}
         {% endif %}
       </div>
       <!-- Post content -->
@@ -164,13 +170,15 @@
         {{ post.content | safe }}
       </div>
       <!-- Tags row -->
-      <div class="col-12 col-lg-8 d-flex align-items-center gap-2 mx-auto mb-5 tags">
-        Tags:
-        {% for topic in post.tags.all %}
-          {% with slug=topic.tag.slug %}
-            <a href="{% url "blog:tagged-stories" slug %}" class="btn rounded-pill blg-btn-secondary sm-font no-wrap">{{topic}}</a>
-          {% endwith %}
-        {% endfor %}
+      <div class="col-12 col-lg-8 mx-auto mb-5 tags">
+        <strong>Tags: </strong>
+        <span>
+          {% for topic in post.tags.all %}
+            {% with slug=topic.tag.slug %}
+              <a href="{% url "blog:tagged-stories" slug %}" class="btn rounded-pill blg-btn-secondary mb-1 sm-font no-wrap">{{topic}}</a>
+            {% endwith %}
+          {% endfor %}
+        </span>
       </div>
       <!-- User Reaction Section -->
       <div class="col-12 col-lg-8 mx-auto mb-5 user-react-section">

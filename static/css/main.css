@@ -609,6 +609,14 @@ input[type='number']#code {
     scroll-snap-stop: always; */
 }
 
+.overflow-x-auto {
+    overflow-x: auto;
+}
+
+.overflow-x-scroll-noscroll {
+    overflow-x: scroll;
+}
+
 /* SIGN UP PAGE  -- styles*/
 .interests--select-box {
     opacity: 0.85;
